@@ -1012,20 +1012,20 @@ result_ideal_strategy = temp[0]
 results_ideal_strategy = temp[1]
 
 
-# In[59]:
+# In[42]:
 
 
 results_ideal_strategy
 
 
-# In[42]:
+# In[43]:
 
 
 #Динамика доходности портфеля сложным процентом
 result_ideal_strategy[result_ideal_strategy['Trend'] == 'buy'].tail(3)
 
 
-# In[43]:
+# In[44]:
 
 
 result_ideal = result_ideal_strategy.copy(deep = True)
@@ -1042,7 +1042,7 @@ result_ideal['dyn_trade_ideal_profit'] = np.where(
 result_ideal['dyn_trade_ideal_profit'] = result_ideal['dyn_trade_ideal_profit'].fillna(method = 'ffill')
 
 
-# In[44]:
+# In[45]:
 
 
 #Смотрим динамику доходности идеальной торговли
@@ -1058,7 +1058,7 @@ dyn_ideal_trading = plt_to_png(plt)
 plt.close()
 
 
-# In[45]:
+# In[46]:
 
 
 #Смотрим динамику доходности идеального портфеля
@@ -1082,7 +1082,7 @@ plt.close()
 
 # # Расчёт бизнес-метрик по расчётам нейронной сети
 
-# In[46]:
+# In[47]:
 
 
 #делаем переразметку относительно засчётных данных
@@ -1095,7 +1095,7 @@ calc_dataset = dataset_trade_quotes_with_extrems.copy(deep = True)
 
 
 
-# In[47]:
+# In[48]:
 
 
 #Добавляем поле с сигналами и трендами
@@ -1114,13 +1114,13 @@ except:
 
 
 
-# In[48]:
+# In[49]:
 
 
 #Переопределяем поля разметки
 
 
-# In[49]:
+# In[50]:
 
 
 calc_dataset['extr'] = None
@@ -1139,7 +1139,7 @@ for i, row in calc_dataset.iterrows():
 calc_dataset.tail(3)
 
 
-# In[50]:
+# In[51]:
 
 
 calc_dataset['Trend'] = None
@@ -1154,37 +1154,37 @@ calc_dataset.tail(3)
 
 
 
-# In[51]:
+# In[52]:
 
 
 temp = get_strategy_inf(calc_dataset, ref)
 
 
-# In[52]:
+# In[53]:
 
 
 result_calc_strategy = temp[0]
 
 
-# In[53]:
+# In[54]:
 
 
 results_calc_strategy = temp[1]
 
 
-# In[60]:
+# In[55]:
 
 
 results_calc_strategy
 
 
-# In[54]:
+# In[56]:
 
 
 result_calc_strategy.head(3)
 
 
-# In[55]:
+# In[57]:
 
 
 result_calc = result_calc_strategy.copy(deep = True)
@@ -1201,7 +1201,7 @@ result_calc['dyn_trade_ideal_profit'] = np.where(
 result_calc['dyn_trade_ideal_profit'] = result_calc['dyn_trade_ideal_profit'].fillna(method = 'ffill')
 
 
-# In[56]:
+# In[58]:
 
 
 #Смотрим динамику доходности торговли по нейронным сетям
@@ -1217,7 +1217,7 @@ dyn_neural_trading = plt_to_png(plt)
 plt.close()
 
 
-# In[57]:
+# In[59]:
 
 
 #Смотрим динамику доходности портфеля с нейронными сетями
@@ -1239,9 +1239,31 @@ plt.close()
 
 
 
+# In[65]:
+
+
+np_signals = result_calc['signals'].values
+
+#Расчёт трендов для тренировочной выборки на основе сигналов по разметке
+last_signal = 2
+np_neural_trends = array('f', []) #Массив ожидаемых данных по тренду
+for i in range(np_signals.shape[0]):
+    if np_signals[i] != last_signal and (np_signals[i] == 2 or np_signals[i] == 0):
+        last_signal = np_signals[i]
+    np_neural_trends.insert(i,last_signal)
+
+result_calc['neural_trends'] = np_neural_trends
+
+
+# In[66]:
+
+
+result_calc.columns
+
+
 # # Сохранение результатов
 
-# In[98]:
+# In[60]:
 
 
 #Соединение с БД
@@ -1255,7 +1277,7 @@ def connect():
 conn = connect()
 
 
-# In[103]:
+# In[61]:
 
 
 if conn.closed == 1:
@@ -1267,7 +1289,7 @@ results = cur.fetchall()
 cur.close()
 
 
-# In[106]:
+# In[62]:
 
 
 if conn.closed == 1:
@@ -1371,7 +1393,7 @@ conn.commit()
 cur.close()
 
 
-# In[ ]:
+# In[63]:
 
 
 #Обновляем данные по задаче
@@ -1388,7 +1410,7 @@ except Exception as e:
     print("Ошибка записи информации о закрытии задачи в БД: ", e)
 
 
-# In[ ]:
+# In[64]:
 
 
 conn.close()
