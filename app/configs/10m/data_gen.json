@@ -7,5 +7,5 @@
 	"extr_bar_count": 20,
 	"size_df": 2,
 	"max_unmark": 0.33,
-	"data_path": "app/data"
+	"data_path": "app/data/10m"
 }

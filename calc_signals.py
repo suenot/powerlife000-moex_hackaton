@@ -134,7 +134,7 @@ from Config_module import Config
 global_config = Config()
 
 
-# In[13]:
+# In[30]:
 
 
 #Модули генерации датасета
@@ -197,7 +197,7 @@ if load_params_from_config_file:
             with open(config_path, 'r', encoding='utf_8') as cfg:
                 temp_data=cfg.read()
         else:
-            with open('app/configs/10m/calc_signals.json', 'r', encoding='utf_8') as cfg:
+            with open('app/configs/1D/calc_signals.json', 'r', encoding='utf_8') as cfg:
                 temp_data=cfg.read()
 
     # parse file`
@@ -274,7 +274,7 @@ def plt_to_png(graph):
     return graphic
 
 
-# In[18]:
+# In[28]:
 
 
 def main (ticker, start_date, end_date):
@@ -309,6 +309,8 @@ def main (ticker, start_date, end_date):
     )
     quotes_1d.index = quotes_1d['Datetime']
     quotes_1d.sort_index(ascending=True, inplace = True)
+    
+    quotes_1d = quotes_1d[:-1]
 
 #     #Фильтруем данные
 #     if data_filter_flag:
@@ -514,7 +516,7 @@ model_num_logic.compile() #Paste it here
 
 # # Делаем запись о задаче по запуску сервиса
 
-# In[32]:
+# In[23]:
 
 
 #Соединение с БД
@@ -528,7 +530,7 @@ def connect():
 conn = connect()
 
 
-# In[1]:
+# In[24]:
 
 
 #Обновляем данные по задаче
@@ -549,6 +551,29 @@ except Exception as e:
 
 
 conn.close()
+
+
+# In[26]:
+
+
+# Акции
+quotes_temp = Ticker(ticker)
+# Свечи по акциям за период
+quotes_1d = quotes_temp.candles(date = start_date, till_date = end_date, period=interval)
+quotes_1d.head()
+
+quotes_1d.rename(
+    columns = {
+        'begin' : 'Datetime',
+        'open' : 'Open',
+        'close' : 'Close',
+        'high' : 'High',
+        'low' : 'Low',
+        'volume' : 'Volume'
+    }, inplace = True
+)
+quotes_1d.index = quotes_1d['Datetime']
+quotes_1d.sort_index(ascending=True, inplace = True)
 
 
 # # Загружаем новый тикер и обрабатываем его
