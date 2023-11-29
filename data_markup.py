@@ -8,6 +8,12 @@ import warnings
 warnings.filterwarnings("ignore", category=DeprecationWarning) 
 
 
+# In[42]:
+
+
+import numpy as np
+
+
 # In[2]:
 
 
@@ -33,7 +39,7 @@ from pandas.errors import SettingWithCopyWarning
 warnings.simplefilter(action="ignore", category=SettingWithCopyWarning)
 
 
-# In[62]:
+# In[4]:
 
 
 import sys
@@ -45,17 +51,15 @@ import psycopg2
 import base64
 
 
-# In[5]:
+# In[ ]:
 
 
 sys.path.insert(0, 'modules')
-from Config_module import Config
-global_config = Config()
 
 
 # # Загрузка параметров
 
-# In[33]:
+# In[6]:
 
 
 load_params_from_config_file = True #Загрузка параметров из файла
@@ -87,7 +91,7 @@ except:
     print("Ошибка парсинга параметров из командной строки")
 
 
-# In[34]:
+# In[7]:
 
 
 if load_params_from_config_file:
@@ -475,7 +479,7 @@ def quotes_with_Y(quotes_with_extrems, extr_bar_count, Y_shift, max_unmark = 0.3
 quotes_1d_with_Y = quotes_with_Y(quotes_with_extrems, extr_bar_count, Y_shift, max_unmark = 0.2)    
 
 
-# In[64]:
+# In[22]:
 
 
 fig, ax = plt.subplots()
@@ -494,7 +498,7 @@ plt.legend(loc="lower right")
 #plt.show()
 
 
-# In[73]:
+# In[23]:
 
 
 def plt_to_png(graph):
@@ -510,13 +514,13 @@ def plt_to_png(graph):
     return graphic
 
 
-# In[74]:
+# In[24]:
 
 
 singals_example = plt_to_png(plt)
 
 
-# In[67]:
+# In[25]:
 
 
 plt.close()
@@ -524,7 +528,7 @@ plt.close()
 
 # # Расчёт трейдов при торговле в лонг
 
-# In[25]:
+# In[26]:
 
 
 #Трейды без смещения
@@ -553,7 +557,7 @@ for i, quote in quotes_with_extrems.iterrows():
     iter_count = iter_count + 1
 
 
-# In[26]:
+# In[27]:
 
 
 #Доходность без смещения
@@ -566,7 +570,7 @@ for row in trades_without_shift:
 print("Доходность без смещения: ", profit_without_shift)
 
 
-# In[27]:
+# In[28]:
 
 
 #Трейды со смещением
@@ -601,7 +605,7 @@ for i, quote in quotes_with_extrems.iterrows():
     iter_count = iter_count + 1
 
 
-# In[28]:
+# In[29]:
 
 
 #Доходность со смещением
@@ -622,82 +626,66 @@ print("Доходность со смещением: ", profit_with_shift)
 
 # # Сохранение результатов
 
-# In[70]:
+# In[36]:
 
 
-#Соединение с БД
-def connect():
-    return psycopg2.connect(
-        host=global_config.db_host,
-        database=global_config.db_database,
-        user=global_config.db_user,
-        password=global_config.db_password
-    )
-conn = connect()
+result_df = quotes_with_extrems.copy(deep = True)
 
 
-# In[42]:
+# In[38]:
 
 
-if conn.closed == 1:
-    conn = connect()
-#Проверяем наличие записи
-cur = conn.cursor()
-cur.execute("SELECT * FROM public.data_markup_results WHERE task_id  = %s;", (task_id,))
-results = cur.fetchall()
-cur.close()
+result_df.drop(columns = ['value', 'end', 'Color', 'x'], inplace = True)
 
 
-# In[75]:
+# In[40]:
 
 
-if conn.closed == 1:
-    conn = connect()
-cur = conn.cursor()
-try:
-    if len(results) == 0:
-        #Записи о результатах в БД нет, записываем новый результат
-        cur.execute(
-            """
-            INSERT INTO data_markup_results (task_id, markup_example, singals_example, profit_without_shift, profit_with_shift)
-            VALUES (%s, %s, %s, %s, %s);
-            """,
-            (task_id, markup_example, singals_example, profit_without_shift, profit_with_shift)
-        )
-    else:
-        #Обновляем запись
-        sql = """ UPDATE data_markup_results
-                    SET markup_example = %s, singals_example = %s, profit_without_shift = %s, profit_with_shift = %s
-                    WHERE task_id = %s"""
-        cur.execute(sql, (markup_example, singals_example, profit_without_shift, profit_with_shift, task_id))
-except Exception as e:
-    print("Ошибка записи результатов в БД: ", e)
-
-conn.commit()
-cur.close()
+result_df.rename(columns = {
+    'Y':'Singals',
+    'extr': 'Extrems'
+}, inplace = True)
 
 
-# In[ ]:
+# In[43]:
 
 
-#Обновляем данные по задаче
-if conn.closed == 1:
-    conn = connect()
-cur = conn.cursor()
-
-sql = """ UPDATE data_markup_results
-            SET task_status = %s
-            WHERE id = %s"""
-try:
-    cur.execute(sql, ('done', task_id))
-except Exception as e:
-    print("Ошибка записи информации о закрытии задачи в БД: ", e)
+result_df['Trend'] = np.where(result_df['Trend'] == 'sell', 0, result_df['Trend'])
+result_df['Trend'] = np.where(result_df['Trend'] == 'buy', 1, result_df['Trend'])
 
 
-# In[76]:
+# In[52]:
 
 
-conn.close()
+result = {
+    'task_id': task_id,
+    'markup': {
+       'description': '',
+        'values': result_df.to_json()
+    },
+    'profit_without_shift': {
+        'description': 'Теоретическая доходность',
+        'value': profit_without_shift
+    },
+    'profit_with_shift': {
+        'description': 'Доходность при смещении точек покупки и продажи на 1 бар',
+        'value': profit_with_shift
+    }
+}
+
+
+# In[47]:
+
+
+#result_json = json.dumps(result)
+
+
+# In[53]:
+
+
+#
+with open('results/murkup_data.json', 'w') as f:
+    json.dump(result, f)
 
 
 # In[ ]:

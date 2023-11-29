@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 # coding: utf-8
 
-# In[ ]:
+# In[1]:
 
 
 import numpy as np
@@ -10,7 +10,7 @@ from sklearn.preprocessing import MinMaxScaler
 from pandas import read_csv
 
 
-# In[56]:
+# In[2]:
 
 
 import json
@@ -18,7 +18,7 @@ import argparse
 import psycopg2
 
 
-# In[57]:
+# In[3]:
 
 
 import os
@@ -52,24 +52,15 @@ from PIL import Image
 import base64
 
 
-# In[58]:
+# In[4]:
 
 
 get_ipython().run_line_magic('matplotlib', 'qt')
 
 
-# In[69]:
-
-
-import sys
-sys.path.insert(0, 'modules')
-from Config_module import Config
-global_config = Config()
-
-
 # # Загрузка параметров
 
-# In[60]:
+# In[6]:
 
 
 load_params_from_config_file = True #Загрузка параметров из файла
@@ -103,7 +94,7 @@ except:
     print("Ошибка парсинга параметров из командной строки")
 
 
-# In[61]:
+# In[7]:
 
 
 if load_params_from_config_file:
@@ -114,7 +105,7 @@ if load_params_from_config_file:
             with open(config_path, 'r', encoding='utf_8') as cfg:
                 temp_data=cfg.read()
         else:
-            with open('app/configs/10m/edu_neural.json', 'r', encoding='utf_8') as cfg:
+            with open('app/configs/1D/edu_neural.json', 'r', encoding='utf_8') as cfg:
                 temp_data=cfg.read()
 
     # parse file`
@@ -148,7 +139,7 @@ if load_params_from_command_line:
 Y_shift = 0
 
 
-# In[62]:
+# In[8]:
 
 
 type = 'current'# Тип нейросети в ансамбле
@@ -176,7 +167,7 @@ save_model_flag = True
 dataset = dataset_type + '_' + dataset_timeframe
 
 
-# In[8]:
+# In[9]:
 
 
 print("Сохранённый датасет отсутствует")
@@ -248,7 +239,7 @@ trainX = np.reshape(trainX, (trainX.shape[0], 1, trainX.shape[1]))
 testX = np.reshape(testX, (testX.shape[0], 1, testX.shape[1]))
 
 
-# In[9]:
+# In[10]:
 
 
 #Проверяем число анализируемых факторов
@@ -257,7 +248,7 @@ print("Число анализируемых данных тренировочн
 print("Число анализируемых данных тестовой выборки", testX.shape[0])
 
 
-# In[51]:
+# In[11]:
 
 
 def plt_to_png(graph):
@@ -273,14 +264,14 @@ def plt_to_png(graph):
     return graphic
 
 
-# In[10]:
+# In[12]:
 
 
 factors_count = trainX.shape[2]
 data_count = trainX.shape[0]
 
 
-# In[11]:
+# In[13]:
 
 
 def data_train():
@@ -290,7 +281,7 @@ def data_train():
         yield (x,y)
 
 
-# In[12]:
+# In[14]:
 
 
 def data_test():
@@ -300,7 +291,7 @@ def data_test():
         yield (x,y)
 
 
-# In[13]:
+# In[15]:
 
 
 def tfdata_generator(x_datas, y_datas, is_training, batch_size=128):
@@ -324,7 +315,7 @@ def tfdata_generator(x_datas, y_datas, is_training, batch_size=128):
     return dataset
 
 
-# In[14]:
+# In[16]:
 
 
 training_set = tfdata_generator(trainX, trainY,is_training=True)
@@ -333,7 +324,7 @@ train_generator = data_train()
 valid_generator = data_test()
 
 
-# In[15]:
+# In[17]:
 
 
 checkpoint_filepath = 'tmp/checkpoint'
@@ -345,7 +336,7 @@ model_checkpoint_callback = tf.keras.callbacks.ModelCheckpoint(
     save_best_only=True)
 
 
-# In[16]:
+# In[18]:
 
 
 from datetime import datetime
@@ -354,20 +345,20 @@ logdir = "logs/scalars/" + datetime.now().strftime("%Y%m%d-%H%M%S")
 tensorboard_callback = keras.callbacks.TensorBoard(log_dir=logdir)
 
 
-# In[17]:
+# In[19]:
 
 
 es = tf.keras.callbacks.EarlyStopping(monitor='val_loss', patience=5)
 
 
-# In[18]:
+# In[20]:
 
 
 #Проверяем существование нейронной сети
 file_path = './'+neural_path+'/ansamble_'+dataset+'_v1.h5'
 
 
-# In[19]:
+# In[21]:
 
 
 #Тестируем нейронную сеть
@@ -378,7 +369,7 @@ if (os.access(file_path, os.F_OK) == True) & (test_model_flag == True):
     model = load_model('./'+neural_path+'/ansamble_'+dataset+'_v1.h5');
 
 
-# In[20]:
+# In[22]:
 
 
 #Дообучаем нейроннуюю сеть
@@ -408,7 +399,7 @@ if (os.access(file_path, os.F_OK) == True) & (test_model_flag == False) & (new_m
         model.save('./'+neural_path+'/ansamble_'+dataset+'_v1.h5')
 
 
-# In[21]:
+# In[23]:
 
 
 if ((os.access(file_path, os.F_OK) == False) | (new_model_flag == True)) & (test_model_flag == False) :
@@ -495,7 +486,7 @@ if ((os.access(file_path, os.F_OK) == False) | (new_model_flag == True)) & (test
     #plt.show()
 
 
-# In[22]:
+# In[24]:
 
 
 print("Предсказываем результат")
@@ -509,7 +500,7 @@ predict_trainY = model.predict(trainX, verbose = 1)
 
 
 
-# In[23]:
+# In[25]:
 
 
 #Преобразовываем выходные сигналы тренировочной выборки
@@ -521,7 +512,7 @@ for predict in predict_trainY:
 result_predict_trainY = np.array(result_predict_trainY)
 
 
-# In[24]:
+# In[26]:
 
 
 #Преобразовываем выходные сигналы тестовой выборки
@@ -533,7 +524,7 @@ for predict in predict_testY:
 result_predict_testY = np.array(result_predict_testY)
 
 
-# In[25]:
+# In[27]:
 
 
 # fig, ax = plt.subplots()
@@ -550,7 +541,7 @@ result_predict_testY = np.array(result_predict_testY)
 # plt.show()
 
 
-# In[26]:
+# In[28]:
 
 
 # fig, ax = plt.subplots()
@@ -575,7 +566,7 @@ result_predict_testY = np.array(result_predict_testY)
 
 # # Расчёт трендов
 
-# In[27]:
+# In[29]:
 
 
 #Расчёт трендов для тренировочной выборки на основе сигналов по разметке
@@ -587,7 +578,7 @@ for i in range(trainY.shape[0]):
     train_trends_origin.insert(i,last_train_signal)
 
 
-# In[28]:
+# In[30]:
 
 
 #Расчёт трендов для тестовой выборки на основе расчётных сигналов
@@ -599,7 +590,7 @@ for i in range(testY.shape[0]):
     test_trends_origin.insert(i,last_test_signal)
 
 
-# In[29]:
+# In[31]:
 
 
 #Расчёт трендов для тренировочной выборки на основе расчётных данных
@@ -611,7 +602,7 @@ for i in range(len(result_predict_trainY)):
     train_trends_predict.insert(i,last_train_signal)
 
 
-# In[30]:
+# In[32]:
 
 
 #Расчёт трендов для тестовой выборки на основе расчётных сигналов
@@ -623,7 +614,7 @@ for i in range(len(result_predict_testY)):
     test_trends_predict.insert(i,last_test_signal)
 
 
-# In[31]:
+# In[33]:
 
 
 train_trends_origin = np.asarray(train_trends_origin).astype(int)
@@ -634,7 +625,7 @@ test_trends_predict = np.asarray(test_trends_predict).astype(int)
 
 # # Расчёт показателей точности
 
-# In[73]:
+# In[34]:
 
 
 train_accuracy_score = accuracy_score(train_trends_origin, train_trends_predict)
@@ -645,7 +636,7 @@ train_f1_score = f1_score(train_trends_origin, train_trends_predict, pos_label=2
 train_log_loss = log_loss(train_trends_origin, train_trends_predict)
 
 
-# In[32]:
+# In[35]:
 
 
 #Выводим данные результатов анализа точности
@@ -660,7 +651,7 @@ print('f1:', f1_score(train_trends_origin, train_trends_predict, pos_label=2))
 print('logloss:', log_loss(train_trends_origin, train_trends_predict))
 
 
-# In[74]:
+# In[36]:
 
 
 test_accuracy_score = accuracy_score(test_trends_origin, test_trends_predict)
@@ -671,7 +662,7 @@ test_f1_score = f1_score(test_trends_origin, test_trends_predict, pos_label=2)
 test_log_loss = log_loss(test_trends_origin, test_trends_predict)
 
 
-# In[33]:
+# In[37]:
 
 
 print("ТЕСТОВАЯ ВЫБОРКА")
@@ -687,7 +678,7 @@ print('logloss:', log_loss(test_trends_origin, test_trends_predict))
 
 # # РАСЧЕТ ДОХОДНОСТИ ТРЕНИРОВОЧНОЙ ВЫБОРКИ
 
-# In[34]:
+# In[38]:
 
 
 print("РАСЧЕТ ДОХОДНОСТИ ТРЕНИРОВОЧНОЙ ВЫБОРКИ")
@@ -718,7 +709,7 @@ one_profit_origin_shift = 1 #Общая доходность со смещени
 one_profit_calc_sigma = 1 #Общая доходность по стандартному отклонению при торговле одной акцией
 
 
-# In[35]:
+# In[39]:
 
 
 #Рассчитываем доходность по уровням
@@ -781,7 +772,7 @@ print("Доходность на одну акцию по размеченным
 print("Доходность на одну акцию по расчётным данным по стандартному отклонению: ", one_profit_calc_sigma)
 
 
-# In[36]:
+# In[40]:
 
 
 fig, ax = plt.subplots()
@@ -801,7 +792,7 @@ plt.legend(loc="upper left")
 plt.show()
 
 
-# In[37]:
+# In[41]:
 
 
 profit_origin_arr_summ = array('f', [])#Массив накопленной оригинальной доходности
@@ -836,7 +827,7 @@ for i in range(len(profit_calc_sigma_arr)):
     last_profit_calc_sigma = last_profit_calc_sigma*profit_calc_sigma_arr[i]
 
 
-# In[38]:
+# In[42]:
 
 
 fig, ax = plt.subplots()
@@ -852,7 +843,7 @@ plt.legend(loc="upper left")
 plt.show()
 
 
-# In[39]:
+# In[43]:
 
 
 train_profit_origin_arr = profit_origin_arr#Массив оригинальной доходности
@@ -866,7 +857,7 @@ train_profit_calc_sigma_arr_summ = profit_calc_sigma_arr_summ#Массив на�
 
 # # Тестовая выборка
 
-# In[40]:
+# In[44]:
 
 
 #РАСЧЕТ ДОХОДНОСТИ ТЕСТОВОЙ ВЫБОРКИ
@@ -952,7 +943,7 @@ print("Доходность на одну акцию по размеченным
 print("Доходность на одну акцию по расчётным данным: ", one_profit_calc_sigma)
 
 
-# In[41]:
+# In[45]:
 
 
 fig, ax = plt.subplots()
@@ -972,7 +963,7 @@ plt.legend(loc="upper left")
 plt.show()
 
 
-# In[42]:
+# In[46]:
 
 
 profit_origin_arr_summ = array('f', [])#Массив накопленной оригинальной доходности
@@ -1007,7 +998,7 @@ for i in range(len(profit_calc_sigma_arr)):
     last_profit_calc_sigma = last_profit_calc_sigma*profit_calc_sigma_arr[i]
 
 
-# In[43]:
+# In[47]:
 
 
 fig, ax = plt.subplots()
@@ -1033,7 +1024,7 @@ test_profit_calc_sigma_arr_summ = profit_calc_sigma_arr_summ#Массив нак
 
 # # РАСЧЕТ РИСКОВ
 
-# In[44]:
+# In[48]:
 
 
 print("РАСЧЕТ РИСКОВ")
@@ -1107,140 +1098,87 @@ print("Коэффициент Шарпа по расчётным данным: "
 # In[ ]:
 
 
-
+plt.plot(his.history['loss'], label='loss тренировочной выборки')
+    plt.plot(his.history['val_loss'], label='loss тестовой выборки')
 
 
 # # Сохранение результатов
 
-# In[85]:
+# In[54]:
 
 
-#Соединение с БД
-def connect():
-    return psycopg2.connect(
-        host=global_config.db_host,
-        database=global_config.db_database,
-        user=global_config.db_user,
-        password=global_config.db_password
-    )
-conn = connect()
+result = {
+    'task_id': task_id,
+    'edu_graph_losses': {
+        'loss': {
+            'description': 'Loss тренировочной выборки',
+            'values': his.history['loss']
+        },
+        'val_loss': {
+            'description': 'Loss валидационной выборки',
+            'values': his.history['val_loss']
+        }
+    },
+    'train_accuracy_score': {
+        'description': 'Метрика точности accuracy тренировочной выборки',
+        'values': train_accuracy_score
+    }, 
+    'train_roc_auc_score': {
+        'description': 'Метрика точности roc_auc тренировочной выборки',
+        'values': train_roc_auc_score
+    }, 
+    'train_precision_score': {
+        'description': 'Метрика точности precision тренировочной выборки',
+        'values': train_precision_score
+    }, 
+    'train_recall_score': {
+        'description': 'Метрика точности recall тренировочной выборки',
+        'values': train_recall_score
+    }, 
+    'train_f1_score': {
+        'description': 'Метрика точности f1 тренировочной выборки',
+        'values': train_f1_score
+    }, 
+    'train_log_loss': {
+        'description': 'Метрика точности log_loss тренировочной выборки',
+        'values': train_log_loss
+    },
+    'test_accuracy_score': {
+        'description': 'Метрика точности accuracy тестовой выборки',
+        'values': test_accuracy_score
+    }, 
+    'test_roc_auc_score': {
+        'description': 'Метрика точности roc_auc тестовой выборки',
+        'values': test_roc_auc_score
+    }, 
+    'test_precision_score': {
+        'description': 'Метрика точности precision тестовой выборки',
+        'values': test_precision_score
+    }, 
+    'test_recall_score': {
+        'description': 'Метрика точности recall тестовой выборки',
+        'values': test_recall_score
+    }, 
+    'test_f1_score': {
+        'description': 'Метрика точности f1 тестовой выборки',
+        'values': test_f1_score
+    }, 
+    'test_log_loss': {
+        'description': 'Метрика точности log тестовой выборки',
+        'values': test_log_loss
+    }
+}
 
 
-# In[89]:
+# In[56]:
 
 
-if conn.closed == 1:
-    conn = connect()
-#Проверяем наличие записи
-cur = conn.cursor()
-cur.execute("SELECT * FROM public.edu_neural_results WHERE task_id  = %s;", (task_id,))
-results = cur.fetchall()
-cur.close()
-
-
-# In[96]:
-
-
-if conn.closed == 1:
-    conn = connect()
-cur = conn.cursor()
-try:
-    if len(results) == 0:
-        print("Записываем результаты")
-        #Записи о результатах в БД нет, записываем новый результат
-        cur.execute(
-            """
-            INSERT INTO public.edu_neural_results 
-            (
-                task_id, 
-                losses_results, 
-                train_accuracy_score, 
-                train_roc_auc_score, 
-                train_precision_score, 
-                train_recall_score, 
-                train_f1_score, 
-                train_log_loss,
-                test_accuracy_score, 
-                test_roc_auc_score, 
-                test_precision_score, 
-                test_recall_score, 
-                test_f1_score, 
-                test_log_loss
-            )
-            VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s);
-            """,
-            (
-                task_id, 
-                losses_results, 
-                train_accuracy_score, 
-                train_roc_auc_score, 
-                train_precision_score, 
-                train_recall_score, 
-                train_f1_score, 
-                train_log_loss,
-                test_accuracy_score, 
-                test_roc_auc_score, 
-                test_precision_score, 
-                test_recall_score, 
-                test_f1_score, 
-                test_log_loss
-            )
-        )
-    else:
-        #Обновляем запись
-        print("Обновляем результаты")
-        sql = """ UPDATE public.edu_neural_results
-                    SET 
-                    losses_results = %s, 
-                    train_accuracy_score = %s, 
-                    train_roc_auc_score = %s, 
-                    train_precision_score = %s, 
-                    train_recall_score = %s, 
-                    train_f1_score = %s, 
-                    train_log_loss = %s,
-                    test_accuracy_score = %s, 
-                    test_roc_auc_score = %s, 
-                    test_precision_score = %s, 
-                    test_recall_score = %s, 
-                    test_f1_score = %s, 
-                    test_log_loss = %s
-                    WHERE task_id = %s"""
-        cur.execute(sql, (
-                losses_results, 
-                train_accuracy_score, 
-                train_roc_auc_score, 
-                train_precision_score, 
-                train_recall_score, 
-                train_f1_score, 
-                train_log_loss,
-                test_accuracy_score, 
-                test_roc_auc_score, 
-                test_precision_score, 
-                test_recall_score, 
-                test_f1_score, 
-                test_log_loss,
-                task_id
-            ))
-except Exception as e:
-    print("Ошибка записи результатов в БД: ", e)
-
-conn.commit()
-cur.close()
+with open('results/edu_neurals.json', 'w') as f:
+    json.dump(result, f)
 
 
 # In[ ]:
 
 
-#Обновляем данные по задаче
-if conn.closed == 1:
-    conn = connect()
-cur = conn.cursor()
 
-sql = """ UPDATE data_markup_results
-            SET task_status = %s
-            WHERE id = %s"""
-try:
-    cur.execute(sql, ('done', task_id))
-except Exception as e:
-    print("Ошибка записи информации о закрытии задачи в БД: ", e)
 

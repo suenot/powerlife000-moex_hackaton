@@ -3,7 +3,7 @@
 
 # # Импортируем библиотеки
 
-# In[40]:
+# In[2]:
 
 
 import datetime
@@ -26,7 +26,7 @@ import pickle
 from sklearn.model_selection import train_test_split
 
 
-# In[38]:
+# In[3]:
 
 
 import json
@@ -36,20 +36,20 @@ from PIL import Image
 import psycopg2
 
 
-# In[3]:
+# In[4]:
 
 
 import warnings
 warnings.simplefilter(action='ignore', category=pd.errors.PerformanceWarning)
 
 
-# In[4]:
+# In[5]:
 
 
 pd.options.mode.chained_assignment = None  # default='warn'
 
 
-# In[5]:
+# In[6]:
 
 
 matplotlib qt
@@ -57,28 +57,20 @@ matplotlib qt
 
 # # Импортируем модули
 
-# In[6]:
+# In[7]:
 
 
 import sys
 import argparse
 
 
-# In[7]:
+# In[8]:
 
 
 sys.path.insert(0, 'modules')
 
 
-# In[8]:
-
-
-#Системные модули
-from DB_module import DB
-from Config_module import Config
-
-
-# In[9]:
+# In[10]:
 
 
 #Модули генерации датасета
@@ -95,17 +87,9 @@ from waves_dataset import waves_dataset#Генерация датасета по
 from logic_dataset import logic_dataset#Генерация датасета на основании логических конструкций logic_dataset(df, prefix = ':1d')
 
 
-# # Инициализация
-
-# In[44]:
-
-
-global_config = Config()
-
-
 # # Параметры генерируемого датасета
 
-# In[33]:
+# In[12]:
 
 
 load_params_from_config_file = True #Загрузка параметров из файла
@@ -139,7 +123,7 @@ except:
     print("Ошибка парсинга параметров из командной строки")
 
 
-# In[ ]:
+# In[13]:
 
 
 if load_params_from_config_file:
@@ -150,7 +134,7 @@ if load_params_from_config_file:
             with open(config_path, 'r', encoding='utf_8') as cfg:
                 temp_data=cfg.read()
         else:
-            with open('app/configs/10m/data_gen.json', 'r', encoding='utf_8') as cfg:
+            with open('app/configs/1D/data_gen.json', 'r', encoding='utf_8') as cfg:
                 temp_data=cfg.read()
 
     # parse file
@@ -184,19 +168,19 @@ if load_params_from_command_line:
 Y_shift = 0
 
 
-# In[12]:
+# In[ ]:
+
+
+
+
+
+# In[ ]:
 
 
 
 
 
 # In[13]:
-
-
-
-
-
-# In[14]:
 
 
 #Смещение категориальных признаков разметки
@@ -220,7 +204,7 @@ size_flag = True
 delete_not_marking_data = True
 
 
-# In[41]:
+# In[14]:
 
 
 def plt_to_png(graph):
@@ -375,7 +359,7 @@ def main (ticker):
 # In[16]:
 
 
-main('SBER')
+#main('SBER')
 #main('ABIO')
 
 
@@ -452,7 +436,7 @@ else:
 
 # # Загружаем список для генерации
 
-# In[28]:
+# In[19]:
 
 
 stocks = Market('stocks')
@@ -468,7 +452,7 @@ tickers_list = stocks.tradestats(date='2023-10-10').groupby('ticker').agg(
 
 # # Генерируем датасеты
 
-# In[30]:
+# In[20]:
 
 
 if len(tickers_list) > 0:
@@ -493,41 +477,57 @@ else:
 
 # # Сохранение результатов
 
-# In[1]:
+# In[14]:
 
 
-#Соединение с БД
-def connect():
-    return psycopg2.connect(
-        host=global_config.db_host,
-        database=global_config.db_database,
-        user=global_config.db_user,
-        password=global_config.db_password
-    )
-conn = connect()
+result = {
+    'task_id': task_id,
+    'status': 'done'
+}
 
 
-# In[42]:
+# In[15]:
 
 
-#Обновляем данные по задаче
-if conn.closed == 1:
-    conn = connect()
-cur = conn.cursor()
-
-sql = """ UPDATE public.data_gen_tasks
-            SET task_status = %s
-            WHERE id = %s"""
-try:
-    cur.execute(sql, ('done', task_id))
-except:
-    print("Ошибка записи информации о закрытии задачи в БД")
+with open('results/data_gen.json', 'w') as f:
+    json.dump(result, f)
 
 
-# In[ ]:
+# In[21]:
 
 
-conn.close()
+# #Соединение с БД
+# def connect():
+#     return psycopg2.connect(
+#         host=global_config.db_host,
+#         database=global_config.db_database,
+#         user=global_config.db_user,
+#         password=global_config.db_password
+#     )
+# conn = connect()
+
+
+# In[22]:
+
+
+# #Обновляем данные по задаче
+# if conn.closed == 1:
+#     conn = connect()
+# cur = conn.cursor()
+
+# sql = """ UPDATE public.data_gen_tasks
+#             SET task_status = %s
+#             WHERE id = %s"""
+# try:
+#     cur.execute(sql, ('done', task_id))
+# except:
+#     print("Ошибка записи информации о закрытии задачи в БД")
+
+
+# In[23]:
+
+
+# conn.close()
 
 
 # In[ ]:

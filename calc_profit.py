@@ -112,6 +112,12 @@ import sys, signal
 # In[10]:
 
 
+sys.path.insert(0, 'modules')
+
+
+# In[11]:
+
+
 def signal_handler(signal, frame):
     print("\nprogram exiting gracefully")
     sys.exit(0)
@@ -119,27 +125,7 @@ def signal_handler(signal, frame):
 signal.signal(signal.SIGINT, signal_handler)
 
 
-# In[11]:
-
-
-sys.path.insert(0, 'modules')
-
-
 # In[12]:
-
-
-#Системные модули
-from DB_module import DB
-from Config_module import Config
-
-
-# In[13]:
-
-
-global_config = Config()
-
-
-# In[14]:
 
 
 #Модули генерации датасета
@@ -158,7 +144,7 @@ from logic_dataset import logic_dataset#Генерация датасета на
 
 # # Параметры генерируемого датасета
 
-# In[15]:
+# In[13]:
 
 
 load_params_from_config_file = True #Загрузка параметров из файла
@@ -193,7 +179,7 @@ except:
     print("Ошибка парсинга параметров из командной строки")
 
 
-# In[16]:
+# In[14]:
 
 
 if load_params_from_config_file:
@@ -204,7 +190,7 @@ if load_params_from_config_file:
             with open(config_path, 'r', encoding='utf_8') as cfg:
                 temp_data=cfg.read()
         else:
-            with open('app/configs/10m/calc_profit.json', 'r', encoding='utf_8') as cfg:
+            with open('app/configs/1D/calc_profit.json', 'r', encoding='utf_8') as cfg:
                 temp_data=cfg.read()
 
     # parse file`
@@ -239,7 +225,7 @@ if load_params_from_command_line:
 Y_shift = 0
 
 
-# In[17]:
+# In[15]:
 
 
 #Смещение категориальных признаков разметки
@@ -272,7 +258,7 @@ stop_loss_flag = False
 stop_loss = -0.1 # в %
 
 
-# In[18]:
+# In[16]:
 
 
 def plt_to_png(graph):
@@ -288,7 +274,7 @@ def plt_to_png(graph):
     return graphic
 
 
-# In[19]:
+# In[17]:
 
 
 #Смотрим результаты разметки
@@ -321,7 +307,7 @@ def show(quotes_with_extrems):
     return quotes_with_extrems
 
 
-# In[20]:
+# In[18]:
 
 
 def get_ideal_profit(quotes_with_extrems):
@@ -372,7 +358,7 @@ def get_ideal_profit(quotes_with_extrems):
     return profit_without_shift, trades_without_shift
 
 
-# In[21]:
+# In[19]:
 
 
 def get_profit_with_shift(df):    
@@ -435,7 +421,7 @@ def get_profit_with_shift(df):
     return profit_with_shift, trades_with_shift
 
 
-# In[22]:
+# In[20]:
 
 
 def get_strategy_inf(dataset, ref):
@@ -569,7 +555,7 @@ def get_strategy_inf(dataset, ref):
     return dataset, results
 
 
-# In[23]:
+# In[21]:
 
 
 def main (ticker):
@@ -690,7 +676,7 @@ def main (ticker):
     return num_logic_df
 
 
-# In[24]:
+# In[22]:
 
 
 def date_filter_1(quotes, filter_data_timezone, filter_data_start, filter_data_end):
@@ -718,7 +704,7 @@ def date_filter_1(quotes, filter_data_timezone, filter_data_start, filter_data_e
     return quotes
 
 
-# In[25]:
+# In[23]:
 
 
 #Подготовка данных
@@ -759,7 +745,7 @@ def prepade_df(df, dataset):
     return trainX, trainY, train_quotes_close
 
 
-# In[26]:
+# In[24]:
 
 
 #Расчёт на основании модели
@@ -811,7 +797,7 @@ def calc_signals(model, trainX, trainY, train_quotes_close):
 
 # # Загружаем нейронные сети
 
-# In[27]:
+# In[25]:
 
 
 #загружаем инвестиционные нейронные сети "neurals_tech_for_investing_signals"
@@ -821,7 +807,7 @@ model_num_logic.compile() #Paste it here
 
 # # Загружаем новый тикер и обрабатываем его
 
-# In[28]:
+# In[26]:
 
 
 print("Начинаем обработку нового тикера: ", ticker, datetime.datetime.now())
@@ -829,7 +815,7 @@ print("Получаем датасеты")
 temp = main(ticker)
 
 
-# In[29]:
+# In[27]:
 
 
 #Предобрабатываем датасеты
@@ -837,7 +823,7 @@ print("Предобрабатываем датасеты")
 num_logic_for_neurals = prepade_df(temp, 'num_logic_1d_1w')
 
 
-# In[30]:
+# In[28]:
 
 
 #Расчёт сигналов
@@ -855,7 +841,7 @@ f1_metric = ansamble_signals_temp[3]
 
 # # Смотрим разметку
 
-# In[31]:
+# In[29]:
 
 
 # Акции
@@ -878,13 +864,13 @@ quotes_1d.index = quotes_1d['Datetime']
 quotes_1d.sort_index(ascending=True, inplace = True)
 
 
-# In[32]:
+# In[30]:
 
 
 dataset_trade_quotes_with_extrems = get_extrems(quotes_1d, delete_not_marking_data, count_points).copy(deep = True)
 
 
-# In[33]:
+# In[31]:
 
 
 #!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
@@ -899,7 +885,7 @@ dataset_trade_quotes_with_extrems = show(dataset_trade_quotes_with_extrems)
 
 
 
-# In[34]:
+# In[32]:
 
 
 len_dataset = dataset_trade_quotes_with_extrems.shape[0]
@@ -908,7 +894,7 @@ len_dataset
 
 # # Смотрим сигналы по разметке и ансамблю
 
-# In[35]:
+# In[33]:
 
 
 fig, ax = plt.subplots()
@@ -926,7 +912,7 @@ plt.plot(y1, label='Тренды нейронной сети')
 plt.plot(y2, label='Сигналы нейронной сети')
 #plt.title('Тренировочная выборка')
 plt.legend(loc="lower right")
-singals_example = plt_to_png(plt)
+#singals_example = plt_to_png(plt)
 # plt.show()
 plt.close()
 
@@ -939,21 +925,21 @@ plt.close()
 
 # # Смотрим показатели точности нейронной сети
 
-# In[36]:
+# In[34]:
 
 
 def toFixed(numObj, digits=0):
     return f"{100*numObj:.{digits}f}"
 
 
-# In[37]:
+# In[35]:
 
 
 def toFixed1(numObj, digits=0):
     return f"{numObj:.{digits}f}"
 
 
-# In[38]:
+# In[36]:
 
 
 test_accuracy_score = toFixed(accuracy_score(ansamble_signals_temp[2][-len_dataset:], ansamble_signals_temp[1][-len_dataset:]), 2)
@@ -964,7 +950,7 @@ test_f1_score = toFixed(f1_score(ansamble_signals_temp[2][-len_dataset:], ansamb
 test_log_loss = toFixed1(log_loss(ansamble_signals_temp[2][-len_dataset:], ansamble_signals_temp[1][-len_dataset:]), 2)
 
 
-# In[39]:
+# In[37]:
 
 
 # print('accuracy:', accuracy_score(ansamble_signals_temp[2][-len_dataset:], ansamble_signals_temp[1][-len_dataset:]))
@@ -997,7 +983,7 @@ print('logloss:', toFixed1(log_loss(ansamble_signals_temp[2][-len_dataset:], ans
 
 
 
-# In[40]:
+# In[38]:
 
 
 #Ставка рефинансирования
@@ -1006,26 +992,26 @@ temp = get_strategy_inf(dataset_trade_quotes_with_extrems, ref)
 result_ideal_strategy = temp[0]
 
 
-# In[41]:
+# In[39]:
 
 
 results_ideal_strategy = temp[1]
 
 
-# In[42]:
+# In[40]:
 
 
 results_ideal_strategy
 
 
-# In[43]:
+# In[41]:
 
 
 #Динамика доходности портфеля сложным процентом
 result_ideal_strategy[result_ideal_strategy['Trend'] == 'buy'].tail(3)
 
 
-# In[44]:
+# In[42]:
 
 
 result_ideal = result_ideal_strategy.copy(deep = True)
@@ -1042,7 +1028,7 @@ result_ideal['dyn_trade_ideal_profit'] = np.where(
 result_ideal['dyn_trade_ideal_profit'] = result_ideal['dyn_trade_ideal_profit'].fillna(method = 'ffill')
 
 
-# In[45]:
+# In[43]:
 
 
 #Смотрим динамику доходности идеальной торговли
@@ -1058,7 +1044,7 @@ dyn_ideal_trading = plt_to_png(plt)
 plt.close()
 
 
-# In[46]:
+# In[44]:
 
 
 #Смотрим динамику доходности идеального портфеля
@@ -1082,7 +1068,7 @@ plt.close()
 
 # # Расчёт бизнес-метрик по расчётам нейронной сети
 
-# In[47]:
+# In[45]:
 
 
 #делаем переразметку относительно засчётных данных
@@ -1095,7 +1081,7 @@ calc_dataset = dataset_trade_quotes_with_extrems.copy(deep = True)
 
 
 
-# In[48]:
+# In[46]:
 
 
 #Добавляем поле с сигналами и трендами
@@ -1114,13 +1100,13 @@ except:
 
 
 
-# In[49]:
+# In[47]:
 
 
 #Переопределяем поля разметки
 
 
-# In[50]:
+# In[48]:
 
 
 calc_dataset['extr'] = None
@@ -1139,7 +1125,7 @@ for i, row in calc_dataset.iterrows():
 calc_dataset.tail(3)
 
 
-# In[51]:
+# In[49]:
 
 
 calc_dataset['Trend'] = None
@@ -1154,37 +1140,31 @@ calc_dataset.tail(3)
 
 
 
-# In[52]:
+# In[50]:
 
 
 temp = get_strategy_inf(calc_dataset, ref)
 
 
-# In[53]:
+# In[51]:
 
 
 result_calc_strategy = temp[0]
 
 
-# In[54]:
+# In[52]:
 
 
 results_calc_strategy = temp[1]
 
 
-# In[55]:
+# In[53]:
 
 
 results_calc_strategy
 
 
-# In[56]:
-
-
-result_calc_strategy.head(3)
-
-
-# In[57]:
+# In[55]:
 
 
 result_calc = result_calc_strategy.copy(deep = True)
@@ -1201,7 +1181,7 @@ result_calc['dyn_trade_ideal_profit'] = np.where(
 result_calc['dyn_trade_ideal_profit'] = result_calc['dyn_trade_ideal_profit'].fillna(method = 'ffill')
 
 
-# In[58]:
+# In[56]:
 
 
 #Смотрим динамику доходности торговли по нейронным сетям
@@ -1217,7 +1197,7 @@ dyn_neural_trading = plt_to_png(plt)
 plt.close()
 
 
-# In[59]:
+# In[57]:
 
 
 #Смотрим динамику доходности портфеля с нейронными сетями
@@ -1239,7 +1219,7 @@ plt.close()
 
 
 
-# In[65]:
+# In[58]:
 
 
 np_signals = result_calc['signals'].values
@@ -1255,171 +1235,195 @@ for i in range(np_signals.shape[0]):
 result_calc['neural_trends'] = np_neural_trends
 
 
-# In[66]:
+# In[59]:
 
 
 result_calc.columns
 
 
-# # Сохранение результатов
-
 # In[60]:
 
 
-#Соединение с БД
-def connect():
-    return psycopg2.connect(
-        host=global_config.db_host,
-        database=global_config.db_database,
-        user=global_config.db_user,
-        password=global_config.db_password
-    )
-conn = connect()
+output_data = result_calc[['Open', 'Close', 'High', 'Low', 'value', 'Volume', 'Datetime',
+       'extr', 'Trend', 'neural_trends']].rename(columns = {
+    'Trend':'Разметка',
+})
 
 
 # In[61]:
 
 
-if conn.closed == 1:
-    conn = connect()
-#Проверяем наличие записи
-cur = conn.cursor()
-cur.execute("SELECT * FROM public.cals_profit_results WHERE task_id  = %s;", (task_id,))
-results = cur.fetchall()
-cur.close()
+output_data['neural_trends'] = np.where(output_data['neural_trends'] == 2.0, 1.0, output_data['neural_trends'])
 
 
 # In[62]:
 
 
-if conn.closed == 1:
-    conn = connect()
-cur = conn.cursor()
-try:
-    
-    if len(results) > 0:
-        try:
-            cur.execute("DELETE FROM public.cals_profit_results WHERE task_id  = %s;", (task_id,))
-        except Exception as e:
-            print("Ошибка удаление предыдущих результатов в БД: ", e)
-    
-    #Записи о результатах в БД нет, записываем новый результат
-    print("Записываем результаты")
-    cur.execute(
-        """
-        INSERT INTO public.cals_profit_results (
-            task_id,
-            singals_example,
-            test_accuracy_score,
-            test_roc_auc_score,
-            test_precision_score,
-            test_recall_score,
-            test_f1_score,
-            test_log_loss,
-
-            data_std,
-            max_risk,
-            buy_hold_std,
-            buy_hold_sharp,
-            ideal_strategy_profit_without_shift,
-            ideal_strategy_profit_with_shift,
-            ideal_strategy_std_without_shift,
-            ideal_strategy_std_with_shift,
-            ideal_strategy_sharp_without_shift,
-            ideal_strategy_sharp_with_shift,
-            ideal_strategy_trade_count_without_shift,
-            ideal_strategy_trade_count_with_shift,
-
-            neural_strategy_profit_without_shift,
-            neural_strategy_profit_with_shift,
-            neural_strategy_std_without_shift,
-            neural_strategy_std_with_shift,
-            neural_strategy_sharp_without_shift,
-            neural_strategy_sharp_with_shift,
-            neural_strategy_trade_count_without_shift,
-            neural_strategy_trade_count_with_shift,
-
-            dyn_ideal_trading,
-            dyn_ideal_portfel,
-            dyn_neural_trading,
-            dyn_neural_portfel
-        )
-        VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s);
-        """,
-        (
-            int(task_id),
-            singals_example,
-            float(test_accuracy_score),
-            float(test_roc_auc_score),
-            float(test_precision_score),
-            float(test_recall_score),
-            float(test_f1_score),
-            float(test_log_loss),
-
-            float(results_ideal_strategy['std']),
-            float(results_ideal_strategy['max_risk']),
-            float(results_ideal_strategy['buy_hold_std']),
-            float(results_ideal_strategy['buy_hold_sharp']),
-            float(results_ideal_strategy['strategy_profit_without_shift']),
-            float(results_ideal_strategy['strategy_profit_with_shift']),
-            float(results_ideal_strategy['strategy_std_without_shift']),
-            float(results_ideal_strategy['strategy_std_with_shift']),
-            float(results_ideal_strategy['strategy_sharp_without_shift']),
-            float(results_ideal_strategy['strategy_sharp_with_shift']),
-            int(results_ideal_strategy['strategy_trade_count_without_shift']),
-            int(results_ideal_strategy['strategy_trade_count_with_shift']),
-
-            float(results_calc_strategy['strategy_profit_without_shift']),
-            float(results_calc_strategy['strategy_profit_with_shift']),
-            float(results_calc_strategy['strategy_std_without_shift']),
-            float(results_calc_strategy['strategy_std_with_shift']),
-            float(results_calc_strategy['strategy_sharp_without_shift']),
-            float(results_calc_strategy['strategy_sharp_with_shift']),
-            int(results_calc_strategy['strategy_trade_count_without_shift']),
-            int(results_calc_strategy['strategy_trade_count_with_shift']),
-
-            dyn_ideal_trading,
-            dyn_ideal_portfel,
-            dyn_neural_trading,
-            dyn_neural_portfel
-        )
-    )
-
-except Exception as e:
-    print("Ошибка записи результатов в БД: ", e)
-    conn = connect()
-
-conn.commit()
-cur.close()
+#output_data.to_csv('results/SBER_results.csv')
 
 
-# In[63]:
+# # Сохранение результатов
+
+# In[67]:
 
 
-#Обновляем данные по задаче
-if conn.closed == 1:
-    conn = connect()
-cur = conn.cursor()
-
-sql = """ UPDATE public.calc_profit_tasks
-            SET task_status = %s
-            WHERE id = %s"""
-try:
-    cur.execute(sql, ('done', task_id))
-except Exception as e:
-    print("Ошибка записи информации о закрытии задачи в БД: ", e)
+result_ideal_df = result_ideal[['Datetime', 'dyn_current_trade_ideal_profit', 'dyn_trade_ideal_profit']]
 
 
-# In[64]:
+# In[80]:
 
 
-conn.close()
+result_calc_df = result_calc_strategy[['Datetime', 'dyn_current_trade_ideal_profit', 'dyn_trade_ideal_profit']]
 
 
 # In[ ]:
 
 
 
+
+
+# In[90]:
+
+
+result = {
+    'task_id': task_id,
+    'singals_example': {
+        'markup_signals': {
+            'description': 'Сигнлаы про разметке',
+            'values': str(list(ansamble_signals_temp[2][-len_dataset:]))
+        },
+        'neural_signals': {
+            'description': 'Сигнлаы нейронной сети',
+            'values': str(list(ansamble_signals_temp[0][-len_dataset:]))
+        },
+        'neural_trends': {
+            'description': 'Тренды нейронной сети',
+            'values': str(list(ansamble_signals_temp[1][-len_dataset:]))
+        }
+    },
+    'test_accuracy_score': {
+        'description': 'Показатели точности датасета по метрике accuracy',
+        'value': test_accuracy_score
+    },
+    'test_roc_auc_score': {
+        'description': 'Показатели точности датасета по метрике roc_auc',
+        'value': test_roc_auc_score
+    },
+    'test_precision_score': {
+        'description': 'Показатели точности датасета по метрике precision',
+        'value': test_precision_score
+    },
+    'test_recall_score': {
+        'description': 'Показатели точности датасета по метрике recall',
+        'value': test_recall_score
+    },
+    'test_f1_score': {
+        'description': 'Показатели точности датасета по метрике f1',
+        'value': test_f1_score
+    },
+    'test_log_loss': {
+        'description': 'Показатели точности датасета по метрике log_loss',
+        'value': test_log_loss
+    },
+
+    'data_std': {
+        'description': 'Стандартное отклонение по всей выборке',
+        'value': results_ideal_strategy['std']
+    },
+    'max_risk': {
+        'description': 'Максимальная просадка',
+        'value': results_ideal_strategy['max_risk']
+    },
+    'buy_hold_std': {
+        'description': 'Стандартное отклонение стратегии buy&hold',
+        'value': results_ideal_strategy['buy_hold_std']
+    },
+    'buy_hold_sharp': {
+        'description': 'Коэффициент шарпа стратегии buy&hold',
+        'value': results_ideal_strategy['buy_hold_sharp']
+    },
+    'ideal_strategy_profit_without_shift': {
+        'description': 'Доходность стратегии по разметке',
+        'value': results_ideal_strategy['strategy_profit_without_shift']
+    },
+    'ideal_strategy_profit_with_shift': {
+        'description': 'Доходность стратегии по разметке со мещением на 1 бар',
+        'value': results_ideal_strategy['strategy_profit_with_shift']
+    },
+    'ideal_strategy_std_without_shift': {
+        'description': 'Стандартное отклонение стратегии по разметке',
+        'value': results_ideal_strategy['strategy_std_without_shift']
+    },
+    'ideal_strategy_std_with_shift': {
+        'description': 'Стандартное отклонение стратегии по разметке со мещением на 1 бар',
+        'value': results_ideal_strategy['strategy_std_with_shift']
+    },
+    'ideal_strategy_sharp_without_shift': {
+        'description': 'Коэффициент Шарпа стратегии по разметке',
+        'value': results_ideal_strategy['strategy_sharp_without_shift']
+    },
+    'ideal_strategy_sharp_with_shift': {
+        'description': 'Коэффициент Шарпа стратегии по разметке со мещением на 1 бар',
+        'value': results_ideal_strategy['strategy_sharp_with_shift']
+    },
+    'ideal_strategy_trade_count_without_shift': {
+        'description': 'Число сделок стратегии по разметке',
+        'value': results_ideal_strategy['strategy_trade_count_without_shift']
+    },
+    'ideal_strategy_trade_count_with_shift': {
+        'description': 'Число сделок стратегии по разметке со мещением на 1 бар',
+        'value': results_ideal_strategy['strategy_trade_count_with_shift']
+    },
+
+    'neural_strategy_profit_without_shift': {
+        'description': 'Доходность стратегии нейронной сети',
+        'value': results_calc_strategy['strategy_profit_without_shift']
+    },
+    'neural_strategy_profit_with_shift': {
+        'description': 'Доходность стратегии нейронной сети при смещении на 1 бар',
+        'value': results_calc_strategy['strategy_profit_with_shift']
+    },
+    'neural_strategy_std_without_shift': {
+        'description': 'Стандартное отклонение стратегии нейронной сети',
+        'value': results_calc_strategy['strategy_std_without_shift']
+    },
+    'neural_strategy_std_with_shift': {
+        'description': 'Стандартное отклонение стратегии нейронной сети при смещении на 1 бар',
+        'value': results_calc_strategy['strategy_std_with_shift']
+    },
+    'neural_strategy_sharp_without_shift': {
+        'description': 'Коэффициент Шарпа стратегии нейронной сети',
+        'value': results_calc_strategy['strategy_sharp_without_shift']
+    },
+    'neural_strategy_sharp_with_shift': {
+        'description': 'Коэффициент Шарпа стратегии нейронной сети при смещении на 1 бар',
+        'value': results_calc_strategy['strategy_sharp_with_shift']
+    },
+    'neural_strategy_trade_count_without_shift': {
+        'description': 'Число сделок стратегии нейронной сети',
+        'value': results_calc_strategy['strategy_trade_count_without_shift']
+    },
+    'neural_strategy_trade_count_with_shift': {
+        'description': 'Число сделок стратегии нейронной сети при смещении на 1 бар',
+        'value': results_calc_strategy['strategy_trade_count_with_shift']
+    },
+
+    'dyn_ideal_trading': {
+        'description': 'Динамика доходности стратегии по разметке',
+        'value': result_ideal_df.to_json()
+    },
+    'dyn_neural_trading': {
+        'description': 'Динамика доходности нейронной сети',
+        'value': result_calc_df.to_json()
+    }
+}
+
+
+# In[91]:
+
+
+with open('results/calc_profit.json', 'w') as f:
+    json.dump(result, f)
 
 
 # In[ ]:

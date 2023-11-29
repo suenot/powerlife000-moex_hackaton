@@ -4,7 +4,7 @@
 	"scaler_path": "app/scalers/1D",
 	"neural_path": "app/neurals/1D",
 	"learning_rate": 0.00001,
-	"epochs": 350,
+	"epochs": 10,
 	"steps_per_epoch": 128,
 	"validation_steps": 128,
 	"new_model_flag": "True"
