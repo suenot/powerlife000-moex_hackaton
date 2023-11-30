@@ -55,7 +55,7 @@ import base64
 # In[4]:
 
 
-get_ipython().run_line_magic('matplotlib', 'qt')
+#%matplotlib qt
 
 
 # # Загрузка параметров

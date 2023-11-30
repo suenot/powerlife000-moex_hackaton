@@ -3,7 +3,7 @@
 
 # # Импортируем библиотеки
 
-# In[1]:
+# In[2]:
 
 
 import datetime
@@ -27,7 +27,7 @@ import pickle
 import yfinance as yf
 
 
-# In[2]:
+# In[3]:
 
 
 import math
@@ -35,7 +35,7 @@ import json
 from moexalgo import Market, Ticker
 
 
-# In[3]:
+# In[4]:
 
 
 from sklearn.preprocessing import MinMaxScaler 
@@ -69,53 +69,53 @@ from PIL import Image
 import base64
 
 
-# In[4]:
+# In[5]:
 
 
 import argparse
 import psycopg2
 
 
-# In[5]:
+# In[6]:
 
 
 from sqlalchemy import create_engine
 
 
-# In[6]:
+# In[7]:
 
 
 import warnings
 warnings.simplefilter(action='ignore', category=pd.errors.PerformanceWarning)
 
 
-# In[7]:
+# In[8]:
 
 
 pd.options.mode.chained_assignment = None  # default='warn'
 
 
-# In[8]:
+# In[9]:
 
 
-get_ipython().run_line_magic('matplotlib', 'qt')
+#%matplotlib qt
 
 
 # # Импортируем модули
 
-# In[9]:
+# In[10]:
 
 
 import sys, signal
 
 
-# In[10]:
+# In[11]:
 
 
 sys.path.insert(0, 'modules')
 
 
-# In[11]:
+# In[12]:
 
 
 def signal_handler(signal, frame):
@@ -125,7 +125,7 @@ def signal_handler(signal, frame):
 signal.signal(signal.SIGINT, signal_handler)
 
 
-# In[12]:
+# In[13]:
 
 
 #Модули генерации датасета
@@ -144,7 +144,7 @@ from logic_dataset import logic_dataset#Генерация датасета на
 
 # # Параметры генерируемого датасета
 
-# In[13]:
+# In[14]:
 
 
 load_params_from_config_file = True #Загрузка параметров из файла
@@ -179,7 +179,7 @@ except:
     print("Ошибка парсинга параметров из командной строки")
 
 
-# In[14]:
+# In[15]:
 
 
 if load_params_from_config_file:
@@ -225,7 +225,7 @@ if load_params_from_command_line:
 Y_shift = 0
 
 
-# In[15]:
+# In[16]:
 
 
 #Смещение категориальных признаков разметки
@@ -258,7 +258,7 @@ stop_loss_flag = False
 stop_loss = -0.1 # в %
 
 
-# In[16]:
+# In[17]:
 
 
 def plt_to_png(graph):
@@ -274,7 +274,7 @@ def plt_to_png(graph):
     return graphic
 
 
-# In[17]:
+# In[18]:
 
 
 #Смотрим результаты разметки
@@ -307,7 +307,7 @@ def show(quotes_with_extrems):
     return quotes_with_extrems
 
 
-# In[18]:
+# In[19]:
 
 
 def get_ideal_profit(quotes_with_extrems):
@@ -358,7 +358,7 @@ def get_ideal_profit(quotes_with_extrems):
     return profit_without_shift, trades_without_shift
 
 
-# In[19]:
+# In[20]:
 
 
 def get_profit_with_shift(df):    
@@ -421,7 +421,7 @@ def get_profit_with_shift(df):
     return profit_with_shift, trades_with_shift
 
 
-# In[20]:
+# In[21]:
 
 
 def get_strategy_inf(dataset, ref):
@@ -555,6 +555,15 @@ def get_strategy_inf(dataset, ref):
     return dataset, results
 
 
+# In[22]:
+
+
+ticker = 'SBER'
+quotes_temp = Ticker(ticker)
+# Свечи по акциям за период
+quotes_1d = quotes_temp.candles(date = start_date, till_date = end_date, period=interval)
+
+
 # In[21]:
 
 
@@ -576,7 +585,8 @@ def main (ticker):
     quotes_temp = Ticker(ticker)
     # Свечи по акциям за период
     quotes_1d = quotes_temp.candles(date = start_date, till_date = end_date, period=interval)
-    quotes_1d.head()
+    #quotes_1d.head()
+    quotes_1d = pd.DataFrame(quotes_1d)
     
     quotes_1d.rename(
         columns = {
@@ -848,7 +858,8 @@ f1_metric = ansamble_signals_temp[3]
 quotes_temp = Ticker(ticker)
 # Свечи по акциям за период
 quotes_1d = quotes_temp.candles(date = start_date, till_date = end_date, period=interval)
-quotes_1d.head()
+quotes_1d = pd.DataFrame(quotes_1d)
+#quotes_1d.head()
 
 quotes_1d.rename(
     columns = {

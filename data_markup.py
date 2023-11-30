@@ -143,6 +143,7 @@ Y_shift = 0
 quotes_temp = Ticker(ticker)
 # Свечи по акциям за период
 quotes = quotes_temp.candles(date = start_date, till_date = end_date, period=interval)
+quotes = pd.DataFrame(quotes)
 
 
 # In[9]:
@@ -381,7 +382,7 @@ y_min = quotes_with_extrems['Low'].min()*0.95
 # In[18]:
 
 
-get_ipython().run_line_magic('matplotlib', 'qt')
+#%matplotlib qt
 
 
 # In[19]:

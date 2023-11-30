@@ -52,7 +52,7 @@ pd.options.mode.chained_assignment = None  # default='warn'
 # In[6]:
 
 
-matplotlib qt
+#matplotlib qt
 
 
 # # Импортируем модули
@@ -241,7 +241,8 @@ def main (ticker):
     quotes_temp = Ticker(ticker)
     # Свечи по акциям за период
     quotes_1d = quotes_temp.candles(date = start_date, till_date = end_date, period=interval)
-    quotes_1d.head()
+    #quotes_1d.head()
+    quotes_1d = pd.DataFrame(quotes_1d)
     
     quotes_1d.rename(
         columns = {
