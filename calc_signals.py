@@ -173,6 +173,7 @@ try:
     _ = parser.add_argument('--count_points')
     _ = parser.add_argument('--extr_bar_count')
     _ = parser.add_argument('--max_unmark')
+    _ = parser.add_argument('--count_days')
     args, unknown = parser.parse_known_args()
     
     if args.config_file:
@@ -215,9 +216,8 @@ if load_params_from_config_file:
     extr_bar_count = config['extr_bar_count'] #Сколько баров размечаем для генерации сигналов
     #Максимальное количество конечных баров волны в %, которые не размечаем
     max_unmark = config['max_unmark']
-
-#Число дней в датасете
-count_datys = config['count_datys']
+    #Число дней в датасете
+    count_days = config['count_days']
     
 if load_params_from_command_line:
     task_id = str(args.task_id)
@@ -228,6 +228,8 @@ if load_params_from_command_line:
     count_points = int(args.count_points) 
     extr_bar_count = int(args.extr_bar_count) 
     max_unmark = float(args.max_unmark) 
+    print(args.count_days)
+    count_days = int(args.count_days) 
 
 Y_shift = 0
 
@@ -572,7 +574,7 @@ while True:
             continue
             
         #Опеределяем начальную и конечную даты для фильтрации
-        start_date = datetime.datetime.today() - datetime.timedelta(days=count_datys)
+        start_date = datetime.datetime.today() - datetime.timedelta(days=count_days)
         end_date = datetime.datetime.today() - datetime.timedelta(days=0)
 
         #Преобразовываем в стринги
