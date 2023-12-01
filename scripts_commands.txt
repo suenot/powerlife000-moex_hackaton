@@ -1,0 +1,14 @@
+calc_profit.py - Расчёт доходности нейронных сетей
+
+
+calc_signals.py - Расчёт сигналов
+
+
+calc_signals.py - Генерация датасетов
+
+
+data_markup.py - Разметка данных
+
+
+data_markup.py - Обучение нейронных сетей
+

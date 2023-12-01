@@ -475,16 +475,6 @@ if ((os.access(file_path, os.F_OK) == False) | (new_model_flag == True)) & (test
         print("Сохраняем нейронную сеть")
         model.save('./'+neural_path+'/ansamble_'+dataset+'_v1.h5')
 
-    #Наблюдаем показатели точности
-    fig, ax = plt.subplots()
-    ax.set_title('Показатели точности обучения нейронной сети, loss MSE')
-    plt.plot(his.history['loss'], label='loss тренировочной выборки')
-    plt.plot(his.history['val_loss'], label='loss тестовой выборки')
-    plt.legend(loc="upper left")
-    losses_results = plt_to_png(plt)
-    plt.close()
-    #plt.show()
-
 
 # In[24]:
 
@@ -492,12 +482,6 @@ if ((os.access(file_path, os.F_OK) == False) | (new_model_flag == True)) & (test
 print("Предсказываем результат")
 predict_testY = model.predict(testX, verbose = 1)
 predict_trainY = model.predict(trainX, verbose = 1)
-
-
-# In[ ]:
-
-
-
 
 
 # In[25]:
@@ -522,46 +506,6 @@ for predict in predict_testY:
     result_predict_testY.append(np.argmax(predict))
         
 result_predict_testY = np.array(result_predict_testY)
-
-
-# In[27]:
-
-
-# fig, ax = plt.subplots()
-# ax.set_title('Сигналы тренировочной выборки')
-
-# y = trainY#Реальные значения
-# y1 = result_predict_trainY#Расчетные значения
-# y1 = y1+3
-
-# plt.plot(y, label='Размеченые данные')
-# plt.plot(y1, label='Расчётные данные нейронной сети')
-# plt.title('Тренировочная выборка')
-# plt.legend(loc="upper left")
-# plt.show()
-
-
-# In[28]:
-
-
-# fig, ax = plt.subplots()
-# ax.set_title('Сигналы тестовой выборки')
-
-# y = testY#Реальные значения
-# y1 = result_predict_testY#Расчетные значения
-# y1 = y1+3
-
-# plt.plot(y, label='Размеченые данные')
-# plt.plot(y1, label='Расчётные данные нейронной сети')
-# plt.title('Тестовая выборка')
-# plt.legend(loc="upper left")
-# plt.show()
-
-
-# In[ ]:
-
-
-
 
 
 # # Расчёт трендов
@@ -772,26 +716,6 @@ print("Доходность на одну акцию по размеченным
 print("Доходность на одну акцию по расчётным данным по стандартному отклонению: ", one_profit_calc_sigma)
 
 
-# In[40]:
-
-
-fig, ax = plt.subplots()
-ax.set_title('Доходность трейдов тренировочной выборки')
-
-ax.hlines(1, 0, count_profit_origin)
-ax.hlines(0.5, 0, count_profit_origin)
-ax.hlines(0, 0, count_profit_calc_sigma)
-
-y_calc_profit_origin = result_profit_origin_arr
-y_calc_profit_origin_shift = result_profit_origin_arr_shift - 0.5
-y_calc_profit_sigma = result_profit_calc_sigma_arr - 1
-plt.plot(y_calc_profit_origin, label='Размеченные данные')
-plt.plot(y_calc_profit_origin_shift, label='Размеченные данные со смещением на 1 день')
-plt.plot(y_calc_profit_sigma, label='Рассчётные данные данные')
-plt.legend(loc="upper left")
-plt.show()
-
-
 # In[41]:
 
 
@@ -825,22 +749,6 @@ for i in range(len(profit_calc_sigma_arr)):
     profit_calc_sigma_arr_summ_show.insert(i,last_profit_calc_sigma*profit_calc_sigma_arr[i]-shift_calc_sigma)
     profit_calc_sigma_arr_summ.insert(i,last_profit_calc_sigma*profit_calc_sigma_arr[i])
     last_profit_calc_sigma = last_profit_calc_sigma*profit_calc_sigma_arr[i]
-
-
-# In[42]:
-
-
-fig, ax = plt.subplots()
-ax.set_title('Накопленная доходность тренировочной выборки')
-
-y_calc_profit_origin = profit_origin_arr_summ_show
-y_calc_profit_origin_shift = profit_origin_arr_shift_summ_show
-y_calc_profit_sigma = profit_calc_sigma_arr_summ_show
-plt.plot(y_calc_profit_origin, label='Размеченные данные')
-plt.plot(y_calc_profit_origin_shift, label='Размеченные данные со смещением')
-plt.plot(y_calc_profit_sigma, label='Рассчётные данные')
-plt.legend(loc="upper left")
-plt.show()
 
 
 # In[43]:
@@ -943,26 +851,6 @@ print("Доходность на одну акцию по размеченным
 print("Доходность на одну акцию по расчётным данным: ", one_profit_calc_sigma)
 
 
-# In[45]:
-
-
-fig, ax = plt.subplots()
-ax.set_title('Доходность трейдов тестовой выборки')
-
-ax.hlines(1, 0, count_profit_origin)
-ax.hlines(0.5, 0, count_profit_origin)
-ax.hlines(0, 0, count_profit_calc_sigma)
-
-y_calc_profit_origin = result_profit_origin_arr
-y_calc_profit_origin_shift = result_profit_origin_arr_shift - 0.5
-y_calc_profit_sigma = result_profit_calc_sigma_arr - 1
-plt.plot(y_calc_profit_origin, label='Размеченные данные')
-plt.plot(y_calc_profit_origin_shift, label='Размеченные данные со смещением на 1 день')
-plt.plot(y_calc_profit_sigma, label='Расчётные данные')
-plt.legend(loc="upper left")
-plt.show()
-
-
 # In[46]:
 
 
@@ -996,30 +884,6 @@ for i in range(len(profit_calc_sigma_arr)):
     profit_calc_sigma_arr_summ_show.insert(i,last_profit_calc_sigma*profit_calc_sigma_arr[i]-shift_calc_sigma)
     profit_calc_sigma_arr_summ.insert(i,last_profit_calc_sigma*profit_calc_sigma_arr[i])
     last_profit_calc_sigma = last_profit_calc_sigma*profit_calc_sigma_arr[i]
-
-
-# In[47]:
-
-
-fig, ax = plt.subplots()
-ax.set_title('Накопленная доходность тестовой выборки')
-
-y_calc_profit_origin = profit_origin_arr_summ_show
-y_calc_profit_origin_shift = profit_origin_arr_shift_summ_show
-y_calc_profit_sigma = profit_calc_sigma_arr_summ_show
-plt.plot(y_calc_profit_origin, label='Размеченные данные')
-plt.plot(y_calc_profit_origin_shift, label='Размеченные данные со смещением на 1 день')
-plt.plot(y_calc_profit_sigma, label='Рассчётные сигналы')
-plt.legend(loc="upper left")
-plt.show()
-
-test_profit_origin_arr = profit_origin_arr#Массив оригинальной доходности
-test_profit_origin_arr_shift = profit_origin_arr_shift#Массив оригинальной доходности со смещением на 1 день
-test_profit_calc_sigma_arr = profit_calc_sigma_arr#Массив доходности по стандартному отклонению
-
-test_profit_origin_arr_summ = profit_origin_arr_summ#Массив накопленной оригинальной доходности
-test_profit_origin_arr_shift_summ = profit_origin_arr_shift_summ#Массив накопленной оригинальной доходности со смещением на 1 день
-test_profit_calc_sigma_arr_summ = profit_calc_sigma_arr_summ#Массив накопленной доходности по стандартному отклонению
 
 
 # # РАСЧЕТ РИСКОВ
@@ -1093,13 +957,6 @@ if sqrt(np.var(test_profit_calc_sigma_arr_summ)) != 0:
 
 #Коэффициент Шарпа по расчётным данным
 print("Коэффициент Шарпа по расчётным данным: ", sharp)
-
-
-# In[ ]:
-
-
-plt.plot(his.history['loss'], label='loss тренировочной выборки')
-    plt.plot(his.history['val_loss'], label='loss тестовой выборки')
 
 
 # # Сохранение результатов

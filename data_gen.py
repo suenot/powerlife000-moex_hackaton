@@ -70,7 +70,7 @@ import argparse
 sys.path.insert(0, 'modules')
 
 
-# In[10]:
+# In[9]:
 
 
 #Модули генерации датасета
@@ -89,7 +89,7 @@ from logic_dataset import logic_dataset#Генерация датасета на
 
 # # Параметры генерируемого датасета
 
-# In[12]:
+# In[10]:
 
 
 load_params_from_config_file = True #Загрузка параметров из файла
@@ -123,7 +123,7 @@ except:
     print("Ошибка парсинга параметров из командной строки")
 
 
-# In[13]:
+# In[11]:
 
 
 if load_params_from_config_file:
@@ -180,7 +180,7 @@ Y_shift = 0
 
 
 
-# In[13]:
+# In[12]:
 
 
 #Смещение категориальных признаков разметки
@@ -204,7 +204,7 @@ size_flag = True
 delete_not_marking_data = True
 
 
-# In[14]:
+# In[13]:
 
 
 def plt_to_png(graph):
@@ -220,7 +220,7 @@ def plt_to_png(graph):
     return graphic
 
 
-# In[15]:
+# In[14]:
 
 
 def main (ticker):
@@ -357,7 +357,7 @@ def main (ticker):
         num_logic_df_test.to_csv(data_path+"/num_logic_1d_1w_test.csv", mode='a', header= False)
 
 
-# In[16]:
+# In[15]:
 
 
 #main('SBER')
@@ -366,7 +366,7 @@ def main (ticker):
 
 # # Проверяем контрольную точку продолжения генерации датасетов
 
-# In[17]:
+# In[16]:
 
 
 def check_size():
@@ -404,7 +404,7 @@ def check_size():
 
 
 
-# In[18]:
+# In[17]:
 
 
 #Проверяем наличие датасетов
@@ -437,14 +437,18 @@ else:
 
 # # Загружаем список для генерации
 
-# In[19]:
+# In[25]:
 
 
 stocks = Market('stocks')
-stocks
 
-#tickers_list = stocks.tradestats(date='2023-10-10')['ticker'].values
-tickers_list = stocks.tradestats(date='2023-10-10').groupby('ticker').agg(
+tickers_list_temp = stocks.tradestats(date='2023-10-10')
+tickers_list = pd.DataFrame(tickers_list_temp).rename(
+    columns = {
+        'secid': 'ticker'
+    }
+)
+tickers_list = tickers_list.groupby('ticker').agg(
     {
         'val': 'sum'
     }

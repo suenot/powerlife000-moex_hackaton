@@ -535,46 +535,23 @@ conn = connect()
 
 
 #Обновляем данные по задаче
-if conn.closed == 1:
-    conn = connect()
-cur = conn.cursor()
+# if conn.closed == 1:
+#     conn = connect()
+# cur = conn.cursor()
 
-sql = """ UPDATE calc_signals_tasks
-            SET task_status = %s
-            WHERE id = %s"""
-try:
-    cur.execute(sql, ('done', task_id))
-except Exception as e:
-    print("Ошибка записи информации о закрытии задачи в БД: ", e)
+# sql = """ UPDATE calc_signals_tasks
+#             SET task_status = %s
+#             WHERE id = %s"""
+# try:
+#     cur.execute(sql, ('done', task_id))
+# except Exception as e:
+#     print("Ошибка записи информации о закрытии задачи в БД: ", e)
 
 
 # In[25]:
 
 
 conn.close()
-
-
-# In[26]:
-
-
-# Акции
-quotes_temp = Ticker(ticker)
-# Свечи по акциям за период
-quotes_1d = quotes_temp.candles(date = start_date, till_date = end_date, period=interval)
-quotes_1d.head()
-
-quotes_1d.rename(
-    columns = {
-        'begin' : 'Datetime',
-        'open' : 'Open',
-        'close' : 'Close',
-        'high' : 'High',
-        'low' : 'Low',
-        'volume' : 'Volume'
-    }, inplace = True
-)
-quotes_1d.index = quotes_1d['Datetime']
-quotes_1d.sort_index(ascending=True, inplace = True)
 
 
 # # Загружаем новый тикер и обрабатываем его
