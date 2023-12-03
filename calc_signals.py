@@ -11,7 +11,7 @@ import pytz
 import os
 from pathlib import Path
 import time
-
+import requests
 import matplotlib.dates as mdates
 import matplotlib.pyplot as plt
 import pandas as pd
@@ -174,6 +174,7 @@ try:
     _ = parser.add_argument('--extr_bar_count')
     _ = parser.add_argument('--max_unmark')
     _ = parser.add_argument('--count_days')
+    _ = parser.add_argument('--respos_url')
     args, unknown = parser.parse_known_args()
     
     if args.config_file:
@@ -218,6 +219,10 @@ if load_params_from_config_file:
     max_unmark = config['max_unmark']
     #Число дней в датасете
     count_days = config['count_days']
+    if config['respos_url']:
+        respos_url = config['respos_url']
+    else:
+        respos_url = '127.0.0.1:8080'
     
 if load_params_from_command_line:
     task_id = str(args.task_id)
@@ -228,8 +233,11 @@ if load_params_from_command_line:
     count_points = int(args.count_points) 
     extr_bar_count = int(args.extr_bar_count) 
     max_unmark = float(args.max_unmark) 
-    print(args.count_days)
-    count_days = int(args.count_days) 
+    count_days = int(args.count_days)
+    if args.respos_url:
+        respos_url = str(args.respos_url).replace(']',"").replace('[',"").replace('"',"").replace("'","")
+    else:
+        respos_url = '127.0.0.1:8080'
 
 Y_shift = 0
 
@@ -554,6 +562,38 @@ conn = connect()
 
 
 conn.close()
+
+
+# In[ ]:
+
+
+# result = {
+#     'task_id': task_id,
+#     'description': 'Script for generating signals started.',
+#     'status': 'Started'
+# }
+
+
+# In[ ]:
+
+
+# count = 0
+
+# while True:
+#     try:
+#         url = 'http://'+respos_url+'/api/v1/task/complied'
+#         response = requests.post(url, json = result)
+#         if response.status_code == 200:
+#             print("Запрос успешно отправлен:")
+#             break
+#     except Exception as err:
+#         print("Ошибка отправка запроса на API:", err)
+    
+#     #Делаем повторные попытки в случае ошибки
+#     if count >= 5:
+#         break
+        
+#     count += 1    
 
 
 # # Загружаем новый тикер и обрабатываем его

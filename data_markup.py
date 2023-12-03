@@ -8,13 +8,14 @@ import warnings
 warnings.filterwarnings("ignore", category=DeprecationWarning) 
 
 
-# In[42]:
+# In[1]:
 
 
 import numpy as np
+import requests
 
 
-# In[2]:
+# In[3]:
 
 
 import datetime
@@ -30,7 +31,7 @@ import yfinance as yf
 from moexalgo import Market, Ticker
 
 
-# In[3]:
+# In[4]:
 
 
 import plotly.graph_objects as go
@@ -39,7 +40,7 @@ from pandas.errors import SettingWithCopyWarning
 warnings.simplefilter(action="ignore", category=SettingWithCopyWarning)
 
 
-# In[4]:
+# In[5]:
 
 
 import sys
@@ -51,7 +52,7 @@ import psycopg2
 import base64
 
 
-# In[ ]:
+# In[6]:
 
 
 sys.path.insert(0, 'modules')
@@ -59,7 +60,7 @@ sys.path.insert(0, 'modules')
 
 # # Загрузка параметров
 
-# In[6]:
+# In[7]:
 
 
 load_params_from_config_file = True #Загрузка параметров из файла
@@ -78,6 +79,7 @@ try:
     _ = parser.add_argument('--end_date')
     _ = parser.add_argument('--count_points')
     _ = parser.add_argument('--extr_bar_count')
+    _ = parser.add_argument('--respos_url')
     args, unknown = parser.parse_known_args()
     
     if args.config_file:
@@ -91,7 +93,7 @@ except:
     print("Ошибка парсинга параметров из командной строки")
 
 
-# In[7]:
+# In[8]:
 
 
 if load_params_from_config_file:
@@ -115,6 +117,10 @@ if load_params_from_config_file:
     end_date = str(config['end_date']) #Конечная дата датасета
     count_points = int(config['count_points']) #Параметр разметки экстремумов
     extr_bar_count = int(config['extr_bar_count']) #Сколько баров размечаем для генерации сигналов
+    if config['respos_url']:
+        respos_url = config['respos_url']
+    else:
+        respos_url = '127.0.0.1:8080'
     
 if load_params_from_command_line:
     task_id = str(args.task_id)
@@ -124,6 +130,10 @@ if load_params_from_command_line:
     end_date = str(args.end_date) #Конечная дата датасета
     count_points = int(args.count_points) #Параметр разметки экстремумов
     extr_bar_count = int(args.extr_bar_count) #Сколько баров размечаем для генерации сигналов
+    if args.respos_url:
+        respos_url = str(args.respos_url).replace(']',"").replace('[',"").replace('"',"").replace("'","")
+    else:
+        respos_url = '127.0.0.1:8080'
 
 Y_shift = 0
 
@@ -136,7 +146,7 @@ Y_shift = 0
 
 # # Читаем и выбираем данные
 
-# In[8]:
+# In[9]:
 
 
 # Акции
@@ -146,7 +156,7 @@ quotes = quotes_temp.candles(date = start_date, till_date = end_date, period=int
 quotes = pd.DataFrame(quotes)
 
 
-# In[9]:
+# In[10]:
 
 
 quotes.rename(
@@ -163,7 +173,7 @@ quotes.index = quotes['Datetime']
 quotes.sort_index(ascending=True, inplace = True)
 
 
-# In[10]:
+# In[11]:
 
 
 # mondays = WeekdayLocator(MONDAY)        # major ticks on the mondays
@@ -189,7 +199,7 @@ quotes.sort_index(ascending=True, inplace = True)
 
 # # Смотрим исходные данные
 
-# In[11]:
+# In[12]:
 
 
 # fig = go.Figure(data=[go.Candlestick(
@@ -204,7 +214,7 @@ quotes.sort_index(ascending=True, inplace = True)
 
 # # Ищем экстремумы
 
-# In[12]:
+# In[13]:
 
 
 def get_extrems(dataset, count_points):
@@ -323,20 +333,20 @@ def get_extrems(dataset, count_points):
     return dataset
 
 
-# In[13]:
+# In[14]:
 
 
 quotes_with_extrems = get_extrems(quotes, count_points)
 
 
-# In[14]:
+# In[15]:
 
 
 quotes_with_extrems['Color'] = None
 quotes_with_extrems['Trend'] = None
 
 
-# In[15]:
+# In[16]:
 
 
 #Раскрашиваем тренды
@@ -366,26 +376,26 @@ for i, quote in quotes_with_extrems.iterrows():
 
 # # Смотрим результаты разметки
 
-# In[16]:
+# In[17]:
 
 
 quotes_with_extrems['x'] = quotes_with_extrems.index
 
 
-# In[17]:
+# In[18]:
 
 
 y_max = quotes_with_extrems['High'].max()*1.05
 y_min = quotes_with_extrems['Low'].min()*0.95
 
 
-# In[18]:
+# In[19]:
 
 
 #%matplotlib qt
 
 
-# In[19]:
+# In[20]:
 
 
 feel_df = quotes_with_extrems
@@ -432,7 +442,7 @@ markup_example = fig.to_html()
 
 # # Разметка сигналов
 
-# In[20]:
+# In[21]:
 
 
 #Разметка Y
@@ -473,14 +483,14 @@ def quotes_with_Y(quotes_with_extrems, extr_bar_count, Y_shift, max_unmark = 0.3
     return quotes_with_extrems
 
 
-# In[21]:
+# In[22]:
 
 
 #Размечаем Y по дневному графику
 quotes_1d_with_Y = quotes_with_Y(quotes_with_extrems, extr_bar_count, Y_shift, max_unmark = 0.2)    
 
 
-# In[22]:
+# In[23]:
 
 
 fig, ax = plt.subplots()
@@ -499,7 +509,7 @@ plt.legend(loc="lower right")
 #plt.show()
 
 
-# In[23]:
+# In[24]:
 
 
 def plt_to_png(graph):
@@ -515,13 +525,13 @@ def plt_to_png(graph):
     return graphic
 
 
-# In[24]:
+# In[25]:
 
 
 singals_example = plt_to_png(plt)
 
 
-# In[25]:
+# In[26]:
 
 
 plt.close()
@@ -529,7 +539,7 @@ plt.close()
 
 # # Расчёт трейдов при торговле в лонг
 
-# In[26]:
+# In[27]:
 
 
 #Трейды без смещения
@@ -558,7 +568,7 @@ for i, quote in quotes_with_extrems.iterrows():
     iter_count = iter_count + 1
 
 
-# In[27]:
+# In[28]:
 
 
 #Доходность без смещения
@@ -571,7 +581,7 @@ for row in trades_without_shift:
 print("Доходность без смещения: ", profit_without_shift)
 
 
-# In[28]:
+# In[29]:
 
 
 #Трейды со смещением
@@ -606,7 +616,7 @@ for i, quote in quotes_with_extrems.iterrows():
     iter_count = iter_count + 1
 
 
-# In[29]:
+# In[30]:
 
 
 #Доходность со смещением
@@ -627,19 +637,19 @@ print("Доходность со смещением: ", profit_with_shift)
 
 # # Сохранение результатов
 
-# In[36]:
+# In[31]:
 
 
 result_df = quotes_with_extrems.copy(deep = True)
 
 
-# In[38]:
+# In[32]:
 
 
 result_df.drop(columns = ['value', 'end', 'Color', 'x'], inplace = True)
 
 
-# In[40]:
+# In[33]:
 
 
 result_df.rename(columns = {
@@ -648,21 +658,31 @@ result_df.rename(columns = {
 }, inplace = True)
 
 
-# In[43]:
+# In[34]:
 
 
 result_df['Trend'] = np.where(result_df['Trend'] == 'sell', 0, result_df['Trend'])
 result_df['Trend'] = np.where(result_df['Trend'] == 'buy', 1, result_df['Trend'])
 
 
-# In[52]:
+# In[42]:
 
 
 result = {
     'task_id': task_id,
     'markup': {
        'description': '',
-        'values': result_df.to_json()
+        'values': {
+            'Datetime': result_df['Datetime'].values.tolist(),
+            'Open': result_df['Open'].values.tolist(),
+            'Close': result_df['Close'].values.tolist(),
+            'High': result_df['High'].values.tolist(),
+            'Low': result_df['Low'].values.tolist(),
+            'Volume': result_df['Volume'].values.tolist(),
+            'Extrems': result_df['Extrems'].values.tolist(),
+            'Trend': result_df['Trend'].values.tolist(),
+            'Singals': result_df['Singals'].values.tolist(),
+        }
     },
     'profit_without_shift': {
         'description': 'Теоретическая доходность',
@@ -675,24 +695,40 @@ result = {
 }
 
 
-# In[47]:
+# In[43]:
 
 
 #result_json = json.dumps(result)
 
 
-# In[53]:
+# In[44]:
 
 
-#
-with open('results/murkup_data.json', 'w') as f:
-    json.dump(result, f)
+# #
+# with open('results/murkup_data.json', 'w') as f:
+#     json.dump(result, f)
 
 
 # In[ ]:
 
 
+count = 0
 
+while True:
+    try:
+        url = 'http://'+respos_url+'/api/v1/task/complied'
+        response = requests.post(url, json = result)
+        if response.status_code == 200:
+            print("Запрос успешно отправлен:")
+            break
+    except Exception as err:
+        print("Ошибка отправка запроса на API:", err)
+    
+    #Делаем повторные попытки в случае ошибки
+    if count >= 5:
+        break
+        
+    count += 1    
 
 
 # In[ ]:

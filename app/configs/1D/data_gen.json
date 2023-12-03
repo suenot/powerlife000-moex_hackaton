@@ -7,5 +7,6 @@
 	"extr_bar_count": 10,
 	"size_df": 2,
 	"max_unmark": 0.33,
-	"data_path": "app/data/1D"
+	"data_path": "app/data/1D",
+	"respos_url": "127.0.0.1:8080"
 }

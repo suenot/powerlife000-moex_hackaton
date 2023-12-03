@@ -8,6 +8,7 @@ import numpy as np
 import pandas as pd
 from sklearn.preprocessing import MinMaxScaler
 from pandas import read_csv
+import requests
 
 
 # In[2]:
@@ -81,6 +82,7 @@ try:
     _ = parser.add_argument('--epochs')
     _ = parser.add_argument('--steps_per_epoch')
     _ = parser.add_argument('--validation_steps')
+    _ = parser.add_argument('--respos_url')
     args, unknown = parser.parse_known_args()
     
     if args.config_file:
@@ -124,6 +126,10 @@ if load_params_from_config_file:
     epochs = config['epochs']
     steps_per_epoch = config['steps_per_epoch']
     validation_steps = config['validation_steps']
+    if config['respos_url']:
+        respos_url = config['respos_url']
+    else:
+        respos_url = '127.0.0.1:8080'
     
 if load_params_from_command_line:
     task_id = str(args.task_id)
@@ -135,6 +141,10 @@ if load_params_from_command_line:
     epochs = int(args.epochs) 
     steps_per_epoch = int(args.steps_per_epoch) 
     validation_steps = int(args.validation_steps) 
+    if args.respos_url:
+        respos_url = str(args.respos_url).replace(']',"").replace('[',"").replace('"',"").replace("'","")
+    else:
+        respos_url = '127.0.0.1:8080'
 
 Y_shift = 0
 
@@ -620,7 +630,7 @@ print('logloss:', log_loss(test_trends_origin, test_trends_predict))
 
 # # Сохранение результатов
 
-# In[54]:
+# In[2]:
 
 
 result = {
@@ -637,51 +647,51 @@ result = {
     },
     'train_accuracy_score': {
         'description': 'Метрика точности accuracy тренировочной выборки',
-        'values': train_accuracy_score
+        'values': float(train_accuracy_score)
     }, 
     'train_roc_auc_score': {
         'description': 'Метрика точности roc_auc тренировочной выборки',
-        'values': train_roc_auc_score
+        'values': float(train_roc_auc_score)
     }, 
     'train_precision_score': {
         'description': 'Метрика точности precision тренировочной выборки',
-        'values': train_precision_score
+        'values': float(train_precision_score)
     }, 
     'train_recall_score': {
         'description': 'Метрика точности recall тренировочной выборки',
-        'values': train_recall_score
+        'values': float(train_recall_score)
     }, 
     'train_f1_score': {
         'description': 'Метрика точности f1 тренировочной выборки',
-        'values': train_f1_score
+        'values': float(train_f1_score)
     }, 
     'train_log_loss': {
         'description': 'Метрика точности log_loss тренировочной выборки',
-        'values': train_log_loss
+        'values': float(train_log_loss)
     },
     'test_accuracy_score': {
         'description': 'Метрика точности accuracy тестовой выборки',
-        'values': test_accuracy_score
+        'values': float(test_accuracy_score)
     }, 
     'test_roc_auc_score': {
         'description': 'Метрика точности roc_auc тестовой выборки',
-        'values': test_roc_auc_score
+        'values': float(test_roc_auc_score)
     }, 
     'test_precision_score': {
         'description': 'Метрика точности precision тестовой выборки',
-        'values': test_precision_score
+        'values': float(test_precision_score)
     }, 
     'test_recall_score': {
         'description': 'Метрика точности recall тестовой выборки',
-        'values': test_recall_score
+        'values': float(test_recall_score)
     }, 
     'test_f1_score': {
         'description': 'Метрика точности f1 тестовой выборки',
-        'values': test_f1_score
+        'values': float(test_f1_score)
     }, 
     'test_log_loss': {
         'description': 'Метрика точности log тестовой выборки',
-        'values': test_log_loss
+        'values': float(test_log_loss)
     }
 }
 
@@ -689,12 +699,28 @@ result = {
 # In[56]:
 
 
-with open('results/edu_neurals.json', 'w') as f:
-    json.dump(result, f)
+# with open('results/edu_neurals.json', 'w') as f:
+#     json.dump(result, f)
 
 
 # In[ ]:
 
 
+count = 0
 
+while True:
+    try:
+        url = 'http://'+respos_url+'/api/v1/task/complied'
+        response = requests.post(url, json = result)
+        if response.status_code == 200:
+            print("Запрос успешно отправлен:")
+            break
+    except Exception as err:
+        print("Ошибка отправка запроса на API:", err)
+    
+    #Делаем повторные попытки в случае ошибки
+    if count >= 5:
+        break
+        
+    count += 1    
 

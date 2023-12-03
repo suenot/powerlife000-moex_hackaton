@@ -7,5 +7,6 @@
 	"count_points": 6,
 	"extr_bar_count": 20,
 	"max_unmark": 0.33,
-	"count_days": 60
+	"count_days": 60,
+	"respos_url": "127.0.0.1:8080"
 }

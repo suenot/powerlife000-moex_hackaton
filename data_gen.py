@@ -3,14 +3,14 @@
 
 # # Импортируем библиотеки
 
-# In[2]:
+# In[1]:
 
 
 import datetime
 import pytz
 import os
 from pathlib import Path
-
+import requests
 import matplotlib.dates as mdates
 import matplotlib.pyplot as plt
 import base64
@@ -110,6 +110,7 @@ try:
     _ = parser.add_argument('--size_df')
     _ = parser.add_argument('--max_unmark')
     _ = parser.add_argument('--data_path')
+    _ = parser.add_argument('--respos_url')
     args, unknown = parser.parse_known_args()
     
     if args.config_file:
@@ -153,6 +154,10 @@ if load_params_from_config_file:
     max_unmark = config['max_unmark']
     #Путь для сохранения генерируемых данных
     data_path = config['data_path'] #Путь должен быть без чёрточки в конце
+    if config['respos_url']:
+        respos_url = config['respos_url']
+    else:
+        respos_url = '127.0.0.1:8080'
     
 if load_params_from_command_line:
     task_id = str(args.task_id)
@@ -164,6 +169,10 @@ if load_params_from_command_line:
     size_df = int(args.size_df) 
     max_unmark = float(args.max_unmark) 
     data_path = str(args.data_path) 
+    if args.respos_url:
+        respos_url = str(args.respos_url).replace(']',"").replace('[',"").replace('"',"").replace("'","")
+    else:
+        respos_url = '127.0.0.1:8080'
 
 Y_shift = 0
 
@@ -494,57 +503,30 @@ result = {
 # In[15]:
 
 
-with open('results/data_gen.json', 'w') as f:
-    json.dump(result, f)
+# with open('results/data_gen.json', 'w') as f:
+#     json.dump(result, f)
 
 
-# In[21]:
+# In[15]:
 
 
-# #Соединение с БД
-# def connect():
-#     return psycopg2.connect(
-#         host=global_config.db_host,
-#         database=global_config.db_database,
-#         user=global_config.db_user,
-#         password=global_config.db_password
-#     )
-# conn = connect()
+count = 0
 
-
-# In[22]:
-
-
-# #Обновляем данные по задаче
-# if conn.closed == 1:
-#     conn = connect()
-# cur = conn.cursor()
-
-# sql = """ UPDATE public.data_gen_tasks
-#             SET task_status = %s
-#             WHERE id = %s"""
-# try:
-#     cur.execute(sql, ('done', task_id))
-# except:
-#     print("Ошибка записи информации о закрытии задачи в БД")
-
-
-# In[23]:
-
-
-# conn.close()
-
-
-# In[ ]:
-
-
-
-
-
-# In[ ]:
-
-
-
+while True:
+    try:
+        url = 'http://'+respos_url+'/api/v1/task/complied'
+        response = requests.post(url, json = result)
+        if response.status_code == 200:
+            print("Запрос успешно отправлен:")
+            break
+    except Exception as err:
+        print("Ошибка отправка запроса на API:", err)
+    
+    #Делаем повторные попытки в случае ошибки
+    if count >= 5:
+        break
+        
+    count += 1    
 
 
 # In[ ]:

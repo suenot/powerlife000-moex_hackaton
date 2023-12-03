@@ -3,7 +3,7 @@
 
 # # Импортируем библиотеки
 
-# In[2]:
+# In[1]:
 
 
 import datetime
@@ -11,7 +11,7 @@ import pytz
 import os
 from pathlib import Path
 import time
-
+import requests
 import matplotlib.dates as mdates
 import matplotlib.pyplot as plt
 import pandas as pd
@@ -27,7 +27,7 @@ import pickle
 import yfinance as yf
 
 
-# In[3]:
+# In[2]:
 
 
 import math
@@ -35,7 +35,7 @@ import json
 from moexalgo import Market, Ticker
 
 
-# In[4]:
+# In[3]:
 
 
 from sklearn.preprocessing import MinMaxScaler 
@@ -69,33 +69,33 @@ from PIL import Image
 import base64
 
 
-# In[5]:
+# In[4]:
 
 
 import argparse
 import psycopg2
 
 
-# In[6]:
+# In[5]:
 
 
 from sqlalchemy import create_engine
 
 
-# In[7]:
+# In[6]:
 
 
 import warnings
 warnings.simplefilter(action='ignore', category=pd.errors.PerformanceWarning)
 
 
-# In[8]:
+# In[7]:
 
 
 pd.options.mode.chained_assignment = None  # default='warn'
 
 
-# In[9]:
+# In[8]:
 
 
 #%matplotlib qt
@@ -103,19 +103,19 @@ pd.options.mode.chained_assignment = None  # default='warn'
 
 # # Импортируем модули
 
-# In[10]:
+# In[9]:
 
 
 import sys, signal
 
 
-# In[11]:
+# In[10]:
 
 
 sys.path.insert(0, 'modules')
 
 
-# In[12]:
+# In[11]:
 
 
 def signal_handler(signal, frame):
@@ -125,7 +125,7 @@ def signal_handler(signal, frame):
 signal.signal(signal.SIGINT, signal_handler)
 
 
-# In[13]:
+# In[12]:
 
 
 #Модули генерации датасета
@@ -144,7 +144,7 @@ from logic_dataset import logic_dataset#Генерация датасета на
 
 # # Параметры генерируемого датасета
 
-# In[14]:
+# In[13]:
 
 
 load_params_from_config_file = True #Загрузка параметров из файла
@@ -166,6 +166,7 @@ try:
     _ = parser.add_argument('--count_points')
     _ = parser.add_argument('--extr_bar_count')
     _ = parser.add_argument('--max_unmark')
+    _ = parser.add_argument('--respos_url')
     args, unknown = parser.parse_known_args()
     
     if args.config_file:
@@ -179,7 +180,7 @@ except:
     print("Ошибка парсинга параметров из командной строки")
 
 
-# In[15]:
+# In[14]:
 
 
 if load_params_from_config_file:
@@ -209,6 +210,10 @@ if load_params_from_config_file:
     extr_bar_count = config['extr_bar_count'] #Сколько баров размечаем для генерации сигналов
     #Максимальное количество конечных баров волны в %, которые не размечаем
     max_unmark = config['max_unmark']
+    if config['respos_url']:
+        respos_url = config['respos_url']
+    else:
+        respos_url = '127.0.0.1:8080'
     
 if load_params_from_command_line:
     task_id = str(args.task_id)
@@ -221,11 +226,15 @@ if load_params_from_command_line:
     count_points = int(args.count_points) 
     extr_bar_count = int(args.extr_bar_count) 
     max_unmark = float(args.max_unmark) 
+    if args.respos_url:
+        respos_url = str(args.respos_url).replace(']',"").replace('[',"").replace('"',"").replace("'","")
+    else:
+        respos_url = '127.0.0.1:8080'
 
 Y_shift = 0
 
 
-# In[16]:
+# In[15]:
 
 
 #Смещение категориальных признаков разметки
@@ -258,7 +267,7 @@ stop_loss_flag = False
 stop_loss = -0.1 # в %
 
 
-# In[17]:
+# In[16]:
 
 
 def plt_to_png(graph):
@@ -274,7 +283,7 @@ def plt_to_png(graph):
     return graphic
 
 
-# In[18]:
+# In[17]:
 
 
 #Смотрим результаты разметки
@@ -307,7 +316,7 @@ def show(quotes_with_extrems):
     return quotes_with_extrems
 
 
-# In[19]:
+# In[18]:
 
 
 def get_ideal_profit(quotes_with_extrems):
@@ -358,7 +367,7 @@ def get_ideal_profit(quotes_with_extrems):
     return profit_without_shift, trades_without_shift
 
 
-# In[20]:
+# In[19]:
 
 
 def get_profit_with_shift(df):    
@@ -421,7 +430,7 @@ def get_profit_with_shift(df):
     return profit_with_shift, trades_with_shift
 
 
-# In[21]:
+# In[20]:
 
 
 def get_strategy_inf(dataset, ref):
@@ -555,7 +564,7 @@ def get_strategy_inf(dataset, ref):
     return dataset, results
 
 
-# In[22]:
+# In[21]:
 
 
 ticker = 'SBER'
@@ -564,7 +573,7 @@ quotes_temp = Ticker(ticker)
 quotes_1d = quotes_temp.candles(date = start_date, till_date = end_date, period=interval)
 
 
-# In[21]:
+# In[22]:
 
 
 def main (ticker):
@@ -686,7 +695,7 @@ def main (ticker):
     return num_logic_df
 
 
-# In[22]:
+# In[23]:
 
 
 def date_filter_1(quotes, filter_data_timezone, filter_data_start, filter_data_end):
@@ -714,7 +723,7 @@ def date_filter_1(quotes, filter_data_timezone, filter_data_start, filter_data_e
     return quotes
 
 
-# In[23]:
+# In[24]:
 
 
 #Подготовка данных
@@ -755,7 +764,7 @@ def prepade_df(df, dataset):
     return trainX, trainY, train_quotes_close
 
 
-# In[24]:
+# In[25]:
 
 
 #Расчёт на основании модели
@@ -807,7 +816,7 @@ def calc_signals(model, trainX, trainY, train_quotes_close):
 
 # # Загружаем нейронные сети
 
-# In[25]:
+# In[26]:
 
 
 #загружаем инвестиционные нейронные сети "neurals_tech_for_investing_signals"
@@ -817,7 +826,7 @@ model_num_logic.compile() #Paste it here
 
 # # Загружаем новый тикер и обрабатываем его
 
-# In[26]:
+# In[27]:
 
 
 print("Начинаем обработку нового тикера: ", ticker, datetime.datetime.now())
@@ -825,7 +834,7 @@ print("Получаем датасеты")
 temp = main(ticker)
 
 
-# In[27]:
+# In[28]:
 
 
 #Предобрабатываем датасеты
@@ -833,7 +842,7 @@ print("Предобрабатываем датасеты")
 num_logic_for_neurals = prepade_df(temp, 'num_logic_1d_1w')
 
 
-# In[28]:
+# In[29]:
 
 
 #Расчёт сигналов
@@ -851,7 +860,7 @@ f1_metric = ansamble_signals_temp[3]
 
 # # Смотрим разметку
 
-# In[29]:
+# In[30]:
 
 
 # Акции
@@ -875,13 +884,13 @@ quotes_1d.index = quotes_1d['Datetime']
 quotes_1d.sort_index(ascending=True, inplace = True)
 
 
-# In[30]:
+# In[31]:
 
 
 dataset_trade_quotes_with_extrems = get_extrems(quotes_1d, delete_not_marking_data, count_points).copy(deep = True)
 
 
-# In[31]:
+# In[32]:
 
 
 #!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
@@ -896,7 +905,7 @@ dataset_trade_quotes_with_extrems = show(dataset_trade_quotes_with_extrems)
 
 
 
-# In[32]:
+# In[33]:
 
 
 len_dataset = dataset_trade_quotes_with_extrems.shape[0]
@@ -905,7 +914,7 @@ len_dataset
 
 # # Смотрим сигналы по разметке и ансамблю
 
-# In[33]:
+# In[34]:
 
 
 fig, ax = plt.subplots()
@@ -936,21 +945,21 @@ plt.close()
 
 # # Смотрим показатели точности нейронной сети
 
-# In[34]:
+# In[35]:
 
 
 def toFixed(numObj, digits=0):
     return f"{100*numObj:.{digits}f}"
 
 
-# In[35]:
+# In[36]:
 
 
 def toFixed1(numObj, digits=0):
     return f"{numObj:.{digits}f}"
 
 
-# In[36]:
+# In[37]:
 
 
 test_accuracy_score = toFixed(accuracy_score(ansamble_signals_temp[2][-len_dataset:], ansamble_signals_temp[1][-len_dataset:]), 2)
@@ -961,7 +970,7 @@ test_f1_score = toFixed(f1_score(ansamble_signals_temp[2][-len_dataset:], ansamb
 test_log_loss = toFixed1(log_loss(ansamble_signals_temp[2][-len_dataset:], ansamble_signals_temp[1][-len_dataset:]), 2)
 
 
-# In[37]:
+# In[38]:
 
 
 # print('accuracy:', accuracy_score(ansamble_signals_temp[2][-len_dataset:], ansamble_signals_temp[1][-len_dataset:]))
@@ -994,7 +1003,7 @@ print('logloss:', toFixed1(log_loss(ansamble_signals_temp[2][-len_dataset:], ans
 
 
 
-# In[38]:
+# In[39]:
 
 
 #Ставка рефинансирования
@@ -1003,26 +1012,26 @@ temp = get_strategy_inf(dataset_trade_quotes_with_extrems, ref)
 result_ideal_strategy = temp[0]
 
 
-# In[39]:
+# In[40]:
 
 
 results_ideal_strategy = temp[1]
 
 
-# In[40]:
+# In[41]:
 
 
 results_ideal_strategy
 
 
-# In[41]:
+# In[42]:
 
 
 #Динамика доходности портфеля сложным процентом
 result_ideal_strategy[result_ideal_strategy['Trend'] == 'buy'].tail(3)
 
 
-# In[42]:
+# In[43]:
 
 
 result_ideal = result_ideal_strategy.copy(deep = True)
@@ -1039,7 +1048,7 @@ result_ideal['dyn_trade_ideal_profit'] = np.where(
 result_ideal['dyn_trade_ideal_profit'] = result_ideal['dyn_trade_ideal_profit'].fillna(method = 'ffill')
 
 
-# In[43]:
+# In[44]:
 
 
 #Смотрим динамику доходности идеальной торговли
@@ -1055,7 +1064,7 @@ dyn_ideal_trading = plt_to_png(plt)
 plt.close()
 
 
-# In[44]:
+# In[45]:
 
 
 #Смотрим динамику доходности идеального портфеля
@@ -1079,7 +1088,7 @@ plt.close()
 
 # # Расчёт бизнес-метрик по расчётам нейронной сети
 
-# In[45]:
+# In[46]:
 
 
 #делаем переразметку относительно засчётных данных
@@ -1092,7 +1101,7 @@ calc_dataset = dataset_trade_quotes_with_extrems.copy(deep = True)
 
 
 
-# In[46]:
+# In[47]:
 
 
 #Добавляем поле с сигналами и трендами
@@ -1111,13 +1120,13 @@ except:
 
 
 
-# In[47]:
+# In[48]:
 
 
 #Переопределяем поля разметки
 
 
-# In[48]:
+# In[49]:
 
 
 calc_dataset['extr'] = None
@@ -1136,7 +1145,7 @@ for i, row in calc_dataset.iterrows():
 calc_dataset.tail(3)
 
 
-# In[49]:
+# In[50]:
 
 
 calc_dataset['Trend'] = None
@@ -1151,25 +1160,25 @@ calc_dataset.tail(3)
 
 
 
-# In[50]:
+# In[51]:
 
 
 temp = get_strategy_inf(calc_dataset, ref)
 
 
-# In[51]:
+# In[52]:
 
 
 result_calc_strategy = temp[0]
 
 
-# In[52]:
+# In[53]:
 
 
 results_calc_strategy = temp[1]
 
 
-# In[53]:
+# In[54]:
 
 
 results_calc_strategy
@@ -1275,13 +1284,13 @@ output_data['neural_trends'] = np.where(output_data['neural_trends'] == 2.0, 1.0
 
 # # Сохранение результатов
 
-# In[67]:
+# In[63]:
 
 
 result_ideal_df = result_ideal[['Datetime', 'dyn_current_trade_ideal_profit', 'dyn_trade_ideal_profit']]
 
 
-# In[80]:
+# In[64]:
 
 
 result_calc_df = result_calc_strategy[['Datetime', 'dyn_current_trade_ideal_profit', 'dyn_trade_ideal_profit']]
@@ -1293,7 +1302,7 @@ result_calc_df = result_calc_strategy[['Datetime', 'dyn_current_trade_ideal_prof
 
 
 
-# In[90]:
+# In[92]:
 
 
 result = {
@@ -1301,40 +1310,40 @@ result = {
     'singals_example': {
         'markup_signals': {
             'description': 'Сигнлаы про разметке',
-            'values': str(list(ansamble_signals_temp[2][-len_dataset:]))
+            'values': ansamble_signals_temp[2][-len_dataset:].tolist()
         },
         'neural_signals': {
             'description': 'Сигнлаы нейронной сети',
-            'values': str(list(ansamble_signals_temp[0][-len_dataset:]))
+            'values': ansamble_signals_temp[0][-len_dataset:].tolist()
         },
         'neural_trends': {
             'description': 'Тренды нейронной сети',
-            'values': str(list(ansamble_signals_temp[1][-len_dataset:]))
+            'values': ansamble_signals_temp[1][-len_dataset:].tolist()
         }
     },
     'test_accuracy_score': {
         'description': 'Показатели точности датасета по метрике accuracy',
-        'value': test_accuracy_score
+        'value': float(test_accuracy_score)
     },
     'test_roc_auc_score': {
         'description': 'Показатели точности датасета по метрике roc_auc',
-        'value': test_roc_auc_score
+        'value': float(test_roc_auc_score)
     },
     'test_precision_score': {
         'description': 'Показатели точности датасета по метрике precision',
-        'value': test_precision_score
+        'value': float(test_precision_score)
     },
     'test_recall_score': {
         'description': 'Показатели точности датасета по метрике recall',
-        'value': test_recall_score
+        'value': float(test_recall_score)
     },
     'test_f1_score': {
         'description': 'Показатели точности датасета по метрике f1',
-        'value': test_f1_score
+        'value': float(test_f1_score)
     },
     'test_log_loss': {
         'description': 'Показатели точности датасета по метрике log_loss',
-        'value': test_log_loss
+        'value': float(test_log_loss)
     },
 
     'data_std': {
@@ -1421,24 +1430,48 @@ result = {
 
     'dyn_ideal_trading': {
         'description': 'Динамика доходности стратегии по разметке',
-        'value': result_ideal_df.to_json()
+        'value': {
+            'Datetime': result_ideal_df['Datetime'].values.tolist(),
+            'dyn_trades_profit': result_ideal_df['dyn_current_trade_ideal_profit'].values.tolist(),
+            'dyn_portfel_profit': result_ideal_df['dyn_current_trade_ideal_profit'].values.tolist(),
+        }
     },
     'dyn_neural_trading': {
         'description': 'Динамика доходности нейронной сети',
-        'value': result_calc_df.to_json()
+        'value': {
+            'Datetime': result_calc_df['Datetime'].values.tolist(),
+            'dyn_trades_profit': result_calc_df['dyn_current_trade_ideal_profit'].values.tolist(),
+            'dyn_portfel_profit': result_calc_df['dyn_current_trade_ideal_profit'].values.tolist(),
+        }
     }
 }
 
 
-# In[91]:
+# In[93]:
 
 
-with open('results/calc_profit.json', 'w') as f:
-    json.dump(result, f)
+# with open('results/calc_profit.json', 'w') as f:
+#     json.dump(result, f)
 
 
 # In[ ]:
 
 
+count = 0
 
+while True:
+    try:
+        url = 'http://'+respos_url+'/api/v1/task/complied'
+        response = requests.post(url, json = result)
+        if response.status_code == 200:
+            print("Запрос успешно отправлен:")
+            break
+    except Exception as err:
+        print("Ошибка отправка запроса на API:", err)
+    
+    #Делаем повторные попытки в случае ошибки
+    if count >= 5:
+        break
+        
+    count += 1    
 

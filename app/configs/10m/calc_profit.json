@@ -8,5 +8,6 @@
 	"end_date": "2023-10-18",
 	"count_points": 6,
 	"extr_bar_count": 20,
-	"max_unmark": 0.33
+	"max_unmark": 0.33,
+	"respos_url": "127.0.0.1:8080"
 }
