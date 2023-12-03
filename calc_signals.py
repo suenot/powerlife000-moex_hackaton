@@ -713,7 +713,7 @@ while True:
                         conn = connect()
                     #Проверяем наличие записи
                     cur = conn.cursor()
-                    cur.execute("SELECT * FROM public.cals_signals_results WHERE task_id  = %s;", (task_id,))
+                    cur.execute("SELECT * FROM public.cals_signals_results WHERE task_id = %s AND ticker = %s;", (task_id,ticker))
                     results = cur.fetchall()
                     cur.close()
                     
