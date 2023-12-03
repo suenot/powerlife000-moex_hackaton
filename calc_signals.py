@@ -134,7 +134,7 @@ from Config_module import Config
 global_config = Config()
 
 
-# In[30]:
+# In[13]:
 
 
 #Модули генерации датасета
@@ -284,7 +284,7 @@ def plt_to_png(graph):
     return graphic
 
 
-# In[28]:
+# In[18]:
 
 
 def main (ticker, start_date, end_date):
@@ -713,7 +713,7 @@ while True:
                         conn = connect()
                     #Проверяем наличие записи
                     cur = conn.cursor()
-                    cur.execute("SELECT * FROM public.edu_neural_results WHERE task_id  = %s;", (task_id,))
+                    cur.execute("SELECT * FROM public.cals_signals_results WHERE task_id  = %s;", (task_id,))
                     results = cur.fetchall()
                     cur.close()
                     
@@ -732,7 +732,7 @@ while True:
                                 task_id,
                                 ticker,
                                 signal,
-                                signal_position,
+                                signal_position
                             )
                             VALUES (%s, %s, %s, %s);
                             """,
@@ -743,6 +743,7 @@ while True:
                                 ansamble_signal_position
                             )
                         )
+                        conn.commit()
                     else:
                         #Обновляем запись
                         print("Обновляем результаты")
@@ -757,6 +758,7 @@ while True:
                                 task_id,
                                 ticker
                             ))
+                        conn.commit()
                     cur.close()
                     
                 except Exception as e:
