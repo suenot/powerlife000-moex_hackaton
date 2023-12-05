@@ -761,6 +761,32 @@ while True:
                         conn.commit()
                     cur.close()
                     
+                    #Отправляем результаты в API
+                    result = {
+                        'task_id': task_id,
+                        'ticker': ticker,
+                        'ansamble_signal': ansamble_signal, 
+                        'ansamble_signal_position': ansamble_signal_position
+                        
+                    }
+                    
+                    count = 0
+                    while True:
+                        try:
+                            url = 'http://'+respos_url+'/api/v1/task/complied'
+                            response = requests.post(url, json = result)
+                            if response.status_code == 200:
+                                print("Запрос успешно отправлен:")
+                                break
+                        except Exception as err:
+                            print("Ошибка отправка запроса на API:", err)
+
+                        #Делаем повторные попытки в случае ошибки
+                        if count >= 5:
+                            break
+
+                        count += 1 
+                    
                 except Exception as e:
                     print("Ошибка записи результатов в БД: ", e)
                     conn = connect()
