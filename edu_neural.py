@@ -61,7 +61,7 @@ import base64
 
 # # Загрузка параметров
 
-# In[6]:
+# In[5]:
 
 
 load_params_from_config_file = True #Загрузка параметров из файла
@@ -96,7 +96,7 @@ except:
     print("Ошибка парсинга параметров из командной строки")
 
 
-# In[7]:
+# In[6]:
 
 
 if load_params_from_config_file:
@@ -149,7 +149,7 @@ if load_params_from_command_line:
 Y_shift = 0
 
 
-# In[8]:
+# In[7]:
 
 
 type = 'current'# Тип нейросети в ансамбле
@@ -177,7 +177,7 @@ save_model_flag = True
 dataset = dataset_type + '_' + dataset_timeframe
 
 
-# In[ ]:
+# In[8]:
 
 
 def is_notebook() -> bool:
@@ -196,18 +196,48 @@ def is_notebook() -> bool:
 # In[9]:
 
 
+#Создаём директории
+try:
+    print("Проверяем наличие директории скалера: ", scaler_path)
+    if os.path.exists(scaler_path) == False:
+        print("Создаём директорию скалера")
+        os.mkdir(scaler_path)
+    else:
+        print("Директория скалера существует")
+except:
+    print("Ошибка создания директории скалера")
+    
+try:
+    print("Проверяем наличие директории нейронной сети: ", neural_path)
+    if os.path.exists(neural_path) == False:
+        print("Создаём директорию нейронной сети")
+        os.mkdir(neural_path)
+    else:
+        print("Директория нейронной сети существует")
+except:
+    print("Ошибка создания директории нейронной сети")
+
+
+# In[9]:
+
+
 # Импортируем данные для обучения и тестирования
 print("Импортируем данные")
 if data_type_flag == 'float16':
-    init_data_train = pd.read_csv('./'+data_path+'/'+dataset+'_train.csv', dtype = 'float16', sep = ',')
+    #init_data_train = pd.read_csv('./'+data_path+'/'+dataset+'_train.csv', dtype = 'float16', sep = ',')
+    init_data_train = pd.read_csv(data_path+'/'+dataset+'_train.csv', dtype = 'float16', sep = ',')
 elif data_type_flag == 'float32':
-    init_data_train = pd.read_csv('./'+data_path+'/'+dataset+'_train.csv', dtype = 'float32', sep = ',')
+    #init_data_train = pd.read_csv('./'+data_path+'/'+dataset+'_train.csv', dtype = 'float32', sep = ',')
+    init_data_train = pd.read_csv(data_path+'/'+dataset+'_train.csv', dtype = 'float32', sep = ',')
 else:
-    init_data_train = pd.read_csv('./'+data_path+'/'+dataset+'_train.csv', sep = ',')
+    #init_data_train = pd.read_csv('./'+data_path+'/'+dataset+'_train.csv', sep = ',')
+    init_data_train = pd.read_csv(data_path+'/'+dataset+'_train.csv', sep = ',')
 if data_type_flag == 'float16':
-    init_data_test = pd.read_csv('./'+data_path+'/'+dataset+'_test.csv', dtype = 'float16', sep = ',')
+    #init_data_test = pd.read_csv('./'+data_path+'/'+dataset+'_test.csv', dtype = 'float16', sep = ',')
+    init_data_test = pd.read_csv(data_path+'/'+dataset+'_test.csv', dtype = 'float16', sep = ',')
 elif data_type_flag == 'float32':
-    init_data_test = pd.read_csv('./'+data_path+'/'+dataset+'_test.csv', dtype = 'float32', sep = ',')
+    #init_data_test = pd.read_csv('./'+data_path+'/'+dataset+'_test.csv', dtype = 'float32', sep = ',')
+    init_data_test = pd.read_csv(data_path+'/'+dataset+'_test.csv', dtype = 'float32', sep = ',')
 else:
     init_data_test = pd.read_csv('./app/data/'+dataset+'_test.csv', sep = ',')
 print("Доля NaN данных в датасете train:", init_data_train.isna().sum() / init_data_train.shape[0]*100)
@@ -248,7 +278,8 @@ x_scaler = MinMaxScaler(feature_range=(-1, 1))
 y_scaler = MinMaxScaler(feature_range=(-1, 1))
 if scale_flag: 
     x_scaler.fit(trainX)
-    scaler_filename = './'+scaler_path+'/scaler_'+dataset+'.save'
+    #scaler_filename = './'+scaler_path+'/scaler_'+dataset+'.save'
+    scaler_filename = scaler_path+'/scaler_'+dataset+'.save'
     joblib.dump(x_scaler, scaler_filename) 
 #Изменяем размерность массива, для обеспечения возможности масштабирования Y
 trainY = trainY.reshape(-1, 1)
@@ -380,7 +411,8 @@ es = tf.keras.callbacks.EarlyStopping(monitor='val_loss', patience=5)
 
 
 #Проверяем существование нейронной сети
-file_path = './'+neural_path+'/ansamble_'+dataset+'_v1.h5'
+#file_path = './'+neural_path+'/ansamble_'+dataset+'_v1.h5'
+file_path = neural_path+'/ansamble_'+dataset+'_v1.h5'
 
 
 # In[21]:
@@ -391,7 +423,8 @@ if (os.access(file_path, os.F_OK) == True) & (test_model_flag == True):
     print("Тестируем нейронную сеть")
     #Загружаем нейронную сеть
     print("Загружаем сеть")
-    model = load_model('./'+neural_path+'/ansamble_'+dataset+'_v1.h5');
+    #model = load_model('./'+neural_path+'/ansamble_'+dataset+'_v1.h5');
+    model = load_model(neural_path+'/ansamble_'+dataset+'_v1.h5');
 
 
 # In[22]:
@@ -402,7 +435,8 @@ if (os.access(file_path, os.F_OK) == True) & (test_model_flag == False) & (new_m
     print("Дообучаем нейронную сеть")
     #Загружаем нейронную сеть
     print("Загружаем сеть")
-    model = load_model('./'+neural_path+'/ansamble_'+dataset+'_v1.h5');
+    #model = load_model('./'+neural_path+'/ansamble_'+dataset+'_v1.h5');
+    model = load_model(neural_path+'/ansamble_'+dataset+'_v1.h5');
     
     #Обучаем нейронную сеть
     print("Обучаем нейронную сеть")
@@ -421,7 +455,8 @@ if (os.access(file_path, os.F_OK) == True) & (test_model_flag == False) & (new_m
     if save_model_flag == True:    
         #Сохраняем нейронную сеть
         print("Сохраняем нейронную сеть")
-        model.save('./'+neural_path+'/ansamble_'+dataset+'_v1.h5')
+        #model.save('./'+neural_path+'/ansamble_'+dataset+'_v1.h5')
+        model.save(neural_path+'/ansamble_'+dataset+'_v1.h5')
 
 
 # In[23]:
@@ -498,7 +533,8 @@ if ((os.access(file_path, os.F_OK) == False) | (new_model_flag == True)) & (test
     if save_model_flag == True:    
         #Сохраняем нейронную сеть
         print("Сохраняем нейронную сеть")
-        model.save('./'+neural_path+'/ansamble_'+dataset+'_v1.h5')
+        #model.save('./'+neural_path+'/ansamble_'+dataset+'_v1.h5')
+        model.save(neural_path+'/ansamble_'+dataset+'_v1.h5')
 
 
 # In[ ]:
