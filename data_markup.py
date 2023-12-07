@@ -141,7 +141,17 @@ Y_shift = 0
 # In[ ]:
 
 
-
+def is_notebook() -> bool:
+    try:
+        shell = get_ipython().__class__.__name__
+        if shell == 'ZMQInteractiveShell':
+            return True   # Jupyter notebook or qtconsole
+        elif shell == 'TerminalInteractiveShell':
+            return False  # Terminal running IPython
+        else:
+            return False  # Other type (?)
+    except NameError:
+        return False      # Probably standard Python interpreter
 
 
 # # Читаем и выбираем данные
@@ -398,46 +408,50 @@ y_min = quotes_with_extrems['Low'].min()*0.95
 # In[20]:
 
 
-feel_df = quotes_with_extrems
-
 try:
-    feel_df.drop(columns = ['Datetime'], inplace = True)
+    if is_notebook():
+
+        feel_df = quotes_with_extrems
+
+        try:
+            feel_df.drop(columns = ['Datetime'], inplace = True)
+        except:
+            pass
+
+        feel_df.reset_index(inplace = True)
+        fig = go.Figure(data=[go.Candlestick(
+                        x=feel_df.index,
+                        open=feel_df['Open'],
+                        high=feel_df['High'],
+                        low=feel_df['Low'],
+                        close=feel_df['Close'])])
+
+        feel_df = quotes_with_extrems[quotes_with_extrems['extr'].notna()]
+
+        feel_df['x'] = feel_df.index
+        feel_df['x1'] = feel_df['x'].shift(-1)
+        feel_df.dropna(subset = ['x1'], inplace = True)
+
+        for i, row in feel_df.iterrows():    
+
+            fig.add_shape(type="rect",
+                                xref="x",
+                                yref="paper",
+                                x0=row['x'],
+                                y0=0,
+                                x1=row['x1'],
+                                y1=row['High']*10,
+                                line=dict(color="rgba(0,0,0,0)",width=3,),
+                                fillcolor=row['Color'],
+                                layer='below')
+
+            #quote_count = quote_count + 1
+
+
+
+        fig.show()
 except:
     pass
-    
-feel_df.reset_index(inplace = True)
-fig = go.Figure(data=[go.Candlestick(
-                x=feel_df.index,
-                open=feel_df['Open'],
-                high=feel_df['High'],
-                low=feel_df['Low'],
-                close=feel_df['Close'])])
-
-feel_df = quotes_with_extrems[quotes_with_extrems['extr'].notna()]
-
-feel_df['x'] = feel_df.index
-feel_df['x1'] = feel_df['x'].shift(-1)
-feel_df.dropna(subset = ['x1'], inplace = True)
-
-for i, row in feel_df.iterrows():    
-
-    fig.add_shape(type="rect",
-                        xref="x",
-                        yref="paper",
-                        x0=row['x'],
-                        y0=0,
-                        x1=row['x1'],
-                        y1=row['High']*10,
-                        line=dict(color="rgba(0,0,0,0)",width=3,),
-                        fillcolor=row['Color'],
-                        layer='below')
-    
-    #quote_count = quote_count + 1
-
- 
-
-# fig.show()
-markup_example = fig.to_html()
 
 
 # # Разметка сигналов
@@ -493,20 +507,24 @@ quotes_1d_with_Y = quotes_with_Y(quotes_with_extrems, extr_bar_count, Y_shift, m
 # In[23]:
 
 
-fig, ax = plt.subplots()
-ax.set_title('Сигналы')
-
 try:
-    show = quotes_1d_with_Y.drop(columns = ['Datetime']).reset_index()#Делаем ресет индекса, чтобы не показывались даты
-except:
-    try:
-        show = quotes_1d_with_Y.reset_index()
-    except:
-        show = quotes_1d_with_Y
+    if is_notebook():
+        fig, ax = plt.subplots()
+        ax.set_title('Сигналы')
 
-plt.plot(show['Y'], label='Размеченые данные')
-plt.legend(loc="lower right")
-#plt.show()
+        try:
+            show = quotes_1d_with_Y.drop(columns = ['Datetime']).reset_index()#Делаем ресет индекса, чтобы не показывались даты
+        except:
+            try:
+                show = quotes_1d_with_Y.reset_index()
+            except:
+                show = quotes_1d_with_Y
+
+        plt.plot(show['Y'], label='Размеченые данные')
+        plt.legend(loc="lower right")
+        #plt.show()
+except:
+    pass
 
 
 # In[24]:

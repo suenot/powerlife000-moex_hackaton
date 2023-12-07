@@ -267,6 +267,22 @@ stop_loss_flag = False
 stop_loss = -0.1 # в %
 
 
+# In[ ]:
+
+
+def is_notebook() -> bool:
+    try:
+        shell = get_ipython().__class__.__name__
+        if shell == 'ZMQInteractiveShell':
+            return True   # Jupyter notebook or qtconsole
+        elif shell == 'TerminalInteractiveShell':
+            return False  # Terminal running IPython
+        else:
+            return False  # Other type (?)
+    except NameError:
+        return False      # Probably standard Python interpreter
+
+
 # In[16]:
 
 
@@ -917,24 +933,28 @@ len_dataset
 # In[34]:
 
 
-fig, ax = plt.subplots()
-ax.set_title('Сигналы по разметке и расчётам ансамбля')
+try:
+    if is_notebook():
+        fig, ax = plt.subplots()
+        ax.set_title('Сигналы по разметке и расчётам ансамбля')
 
 
-y = ansamble_signals_temp[2][-len_dataset:]#Реальные значения
-y1 = ansamble_signals_temp[1][-len_dataset:]#Расчетные значения
-y1 = y1+3
-y2 = ansamble_signals_temp[0][-len_dataset:]
-y2 = y2+6
+        y = ansamble_signals_temp[2][-len_dataset:]#Реальные значения
+        y1 = ansamble_signals_temp[1][-len_dataset:]#Расчетные значения
+        y1 = y1+3
+        y2 = ansamble_signals_temp[0][-len_dataset:]
+        y2 = y2+6
 
-plt.plot(y, label='Размеченые данные')
-plt.plot(y1, label='Тренды нейронной сети')
-plt.plot(y2, label='Сигналы нейронной сети')
-#plt.title('Тренировочная выборка')
-plt.legend(loc="lower right")
-#singals_example = plt_to_png(plt)
-# plt.show()
-plt.close()
+        plt.plot(y, label='Размеченые данные')
+        plt.plot(y1, label='Тренды нейронной сети')
+        plt.plot(y2, label='Сигналы нейронной сети')
+        #plt.title('Тренировочная выборка')
+        plt.legend(loc="lower right")
+        #singals_example = plt_to_png(plt)
+        plt.show()
+        #plt.close()
+except:
+    pass
 
 
 # In[ ]:
@@ -1051,33 +1071,41 @@ result_ideal['dyn_trade_ideal_profit'] = result_ideal['dyn_trade_ideal_profit'].
 # In[44]:
 
 
-#Смотрим динамику доходности идеальной торговли
-fig, ax = plt.subplots()
-ax.set_title('Динамика доходности идеальной торговли')
+try:
+    if is_notebook():
+        #Смотрим динамику доходности идеальной торговли
+        fig, ax = plt.subplots()
+        ax.set_title('Динамика доходности идеальной торговли')
 
-y = result_ideal['dyn_current_trade_ideal_profit']
+        y = result_ideal['dyn_current_trade_ideal_profit']
 
-plt.plot(y, label='Доходность')
-plt.legend(loc="lower right")
-dyn_ideal_trading = plt_to_png(plt)
-#plt.show()
-plt.close()
+        plt.plot(y, label='Доходность')
+        plt.legend(loc="lower right")
+        dyn_ideal_trading = plt_to_png(plt)
+        plt.show()
+        #plt.close()
+except:
+    pass
 
 
 # In[45]:
 
 
-#Смотрим динамику доходности идеального портфеля
-fig, ax = plt.subplots()
-ax.set_title('Динамика доходности идеального портфеля')
+try:
+    if is_notebook():
+        #Смотрим динамику доходности идеального портфеля
+        fig, ax = plt.subplots()
+        ax.set_title('Динамика доходности идеального портфеля')
 
-y = result_ideal['dyn_trade_ideal_profit']
+        y = result_ideal['dyn_trade_ideal_profit']
 
-plt.plot(y, label='Доходность')
-plt.legend(loc="lower right")
-dyn_ideal_portfel = plt_to_png(plt)
-#plt.show()
-plt.close()
+        plt.plot(y, label='Доходность')
+        plt.legend(loc="lower right")
+        dyn_ideal_portfel = plt_to_png(plt)
+        plt.show()
+        #plt.close()
+except:
+    pass
 
 
 # In[ ]:
@@ -1204,33 +1232,41 @@ result_calc['dyn_trade_ideal_profit'] = result_calc['dyn_trade_ideal_profit'].fi
 # In[56]:
 
 
-#Смотрим динамику доходности торговли по нейронным сетям
-fig, ax = plt.subplots()
-ax.set_title('Динамика доходности торговли по нейронным сетям')
+try:
+    if is_notebook():
+        #Смотрим динамику доходности торговли по нейронным сетям
+        fig, ax = plt.subplots()
+        ax.set_title('Динамика доходности торговли по нейронным сетям')
 
-y = result_calc['dyn_current_trade_ideal_profit']
+        y = result_calc['dyn_current_trade_ideal_profit']
 
-plt.plot(y, label='Доходность')
-plt.legend(loc="lower right")
-dyn_neural_trading = plt_to_png(plt)
-#plt.show()
-plt.close()
+        plt.plot(y, label='Доходность')
+        plt.legend(loc="lower right")
+        dyn_neural_trading = plt_to_png(plt)
+        plt.show()
+        #plt.close()
+except:
+    pass
 
 
 # In[57]:
 
 
-#Смотрим динамику доходности портфеля с нейронными сетями
-fig, ax = plt.subplots()
-ax.set_title('Динамика доходности портфеля с нейронными сетями')
+try:
+    if is_notebook():
+        #Смотрим динамику доходности портфеля с нейронными сетями
+        fig, ax = plt.subplots()
+        ax.set_title('Динамика доходности портфеля с нейронными сетями')
 
-y = result_calc['dyn_trade_ideal_profit']
+        y = result_calc['dyn_trade_ideal_profit']
 
-plt.plot(y, label='Доходность')
-plt.legend(loc="lower right")
-dyn_neural_portfel = plt_to_png(plt)
-#plt.show()
-plt.close()
+        plt.plot(y, label='Доходность')
+        plt.legend(loc="lower right")
+        dyn_neural_portfel = plt_to_png(plt)
+        plt.show()
+        #plt.close()
+except:
+    pass
 
 
 # In[ ]:
@@ -1253,12 +1289,6 @@ for i in range(np_signals.shape[0]):
     np_neural_trends.insert(i,last_signal)
 
 result_calc['neural_trends'] = np_neural_trends
-
-
-# In[59]:
-
-
-result_calc.columns
 
 
 # In[60]:

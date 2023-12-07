@@ -177,6 +177,22 @@ save_model_flag = True
 dataset = dataset_type + '_' + dataset_timeframe
 
 
+# In[ ]:
+
+
+def is_notebook() -> bool:
+    try:
+        shell = get_ipython().__class__.__name__
+        if shell == 'ZMQInteractiveShell':
+            return True   # Jupyter notebook or qtconsole
+        elif shell == 'TerminalInteractiveShell':
+            return False  # Terminal running IPython
+        else:
+            return False  # Other type (?)
+    except NameError:
+        return False      # Probably standard Python interpreter
+
+
 # In[9]:
 
 
@@ -484,6 +500,22 @@ if ((os.access(file_path, os.F_OK) == False) | (new_model_flag == True)) & (test
         #Сохраняем нейронную сеть
         print("Сохраняем нейронную сеть")
         model.save('./'+neural_path+'/ansamble_'+dataset+'_v1.h5')
+
+
+# In[ ]:
+
+
+try:
+    if is_notebook():
+        #Наблюдаем показатели точности
+        fig, ax = plt.subplots()
+        ax.set_title('Показатели точности обучения нейронной сети, loss MSE')
+        plt.plot(his.history['loss'], label='loss тренировочной выборки')
+        plt.plot(his.history['val_loss'], label='loss тестовой выборки')
+        plt.legend(loc="upper left")
+        plt.show()
+except:
+    pass
 
 
 # In[24]:
