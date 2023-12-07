@@ -26,7 +26,7 @@ import pickle
 from sklearn.model_selection import train_test_split
 
 
-# In[3]:
+# In[2]:
 
 
 import json
@@ -36,20 +36,20 @@ from PIL import Image
 import psycopg2
 
 
-# In[4]:
+# In[3]:
 
 
 import warnings
 warnings.simplefilter(action='ignore', category=pd.errors.PerformanceWarning)
 
 
-# In[5]:
+# In[4]:
 
 
 pd.options.mode.chained_assignment = None  # default='warn'
 
 
-# In[6]:
+# In[5]:
 
 
 #matplotlib qt
@@ -57,20 +57,20 @@ pd.options.mode.chained_assignment = None  # default='warn'
 
 # # Импортируем модули
 
-# In[7]:
+# In[6]:
 
 
 import sys
 import argparse
 
 
-# In[8]:
+# In[7]:
 
 
 sys.path.insert(0, 'modules')
 
 
-# In[9]:
+# In[8]:
 
 
 #Модули генерации датасета
@@ -89,7 +89,7 @@ from logic_dataset import logic_dataset#Генерация датасета на
 
 # # Параметры генерируемого датасета
 
-# In[10]:
+# In[9]:
 
 
 load_params_from_config_file = True #Загрузка параметров из файла
@@ -124,7 +124,7 @@ except:
     print("Ошибка парсинга параметров из командной строки")
 
 
-# In[11]:
+# In[10]:
 
 
 if load_params_from_config_file:
@@ -166,7 +166,7 @@ if load_params_from_command_line:
     end_date = str(args.end_date) 
     count_points = int(args.count_points)
     extr_bar_count = int(args.extr_bar_count) 
-    size_df = int(args.size_df) 
+    size_df = float(args.size_df) 
     max_unmark = float(args.max_unmark) 
     data_path = str(args.data_path) 
     if args.respos_url:
@@ -189,7 +189,7 @@ Y_shift = 0
 
 
 
-# In[12]:
+# In[11]:
 
 
 #Смещение категориальных признаков разметки
@@ -213,7 +213,7 @@ size_flag = True
 delete_not_marking_data = True
 
 
-# In[13]:
+# In[12]:
 
 
 def plt_to_png(graph):
@@ -229,7 +229,7 @@ def plt_to_png(graph):
     return graphic
 
 
-# In[14]:
+# In[13]:
 
 
 def main (ticker):
@@ -366,7 +366,7 @@ def main (ticker):
         num_logic_df_test.to_csv(data_path+"/num_logic_1d_1w_test.csv", mode='a', header= False)
 
 
-# In[15]:
+# In[14]:
 
 
 #main('SBER')
@@ -375,7 +375,7 @@ def main (ticker):
 
 # # Проверяем контрольную точку продолжения генерации датасетов
 
-# In[16]:
+# In[15]:
 
 
 def check_size():
@@ -413,7 +413,7 @@ def check_size():
 
 
 
-# In[17]:
+# In[16]:
 
 
 #Проверяем наличие датасетов
@@ -441,12 +441,12 @@ if os.path.exists(data_path):
         except:
             print("Отсутствуют данные сохранения")
 else:
-    os.mkdir("app/data")
+    os.mkdir(data_path)
 
 
 # # Загружаем список для генерации
 
-# In[25]:
+# In[17]:
 
 
 stocks = Market('stocks')
