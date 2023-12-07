@@ -2,10 +2,6 @@
 # coding: utf-8
 
 # # Импортируем библиотеки
-
-# In[1]:
-
-
 import datetime
 import pytz
 import os
@@ -25,19 +21,9 @@ from sklearn.model_selection import train_test_split
 import talib
 import pickle
 import yfinance as yf
-
-
-# In[2]:
-
-
 import math
 import json
 from moexalgo import Market, Ticker
-
-
-# In[3]:
-
-
 from sklearn.preprocessing import MinMaxScaler 
 import tensorflow as tf
 from tensorflow import keras
@@ -55,78 +41,34 @@ from tensorflow.keras.models import load_model
 from array import *
 import os.path
 import joblib
-
 from sklearn.preprocessing import LabelBinarizer
 from sklearn.model_selection import train_test_split
 from sklearn.metrics import precision_score, recall_score, auc, accuracy_score, roc_auc_score,f1_score,log_loss,\
 classification_report, roc_curve
-
 from math import sqrt
-
 from sys import argv #Module for receiving parameters from the command line
 import io
 from PIL import Image
 import base64
-
-
-# In[4]:
-
-
 import argparse
 import psycopg2
-
-
-# In[5]:
-
-
 from sqlalchemy import create_engine
-
-
-# In[6]:
-
 
 import warnings
 warnings.simplefilter(action='ignore', category=pd.errors.PerformanceWarning)
 
-
-# In[7]:
-
-
 pd.options.mode.chained_assignment = None  # default='warn'
 
-
-# In[8]:
-
-
 #%matplotlib qt
-
-
 # # Импортируем модули
-
-# In[9]:
-
-
 import sys, signal
-
-
-# In[10]:
-
-
 sys.path.insert(0, 'modules')
-
-
-# In[11]:
-
 
 def signal_handler(signal, frame):
     print("\nprogram exiting gracefully")
     sys.exit(0)
 
 signal.signal(signal.SIGINT, signal_handler)
-
-
-# In[12]:
-
 
 #Модули генерации датасета
 from date_filter import date_filter #Фильтрация данных по датам date_filter(quotes, filter_data_timezone, filter_data_start, filter_data_end)
@@ -143,10 +85,6 @@ from logic_dataset import logic_dataset#Генерация датасета на
 
 
 # # Параметры генерируемого датасета
-
-# In[13]:
-
-
 load_params_from_config_file = True #Загрузка параметров из файла
 load_params_from_command_line = False #Загрузка параметров из командной строки
 args = None
@@ -178,10 +116,6 @@ try:
             load_params_from_command_line = True
 except:
     print("Ошибка парсинга параметров из командной строки")
-
-
-# In[14]:
-
 
 if load_params_from_config_file:
     #Если есть параметры командной строки
@@ -233,10 +167,6 @@ if load_params_from_command_line:
 
 Y_shift = 0
 
-
-# In[15]:
-
-
 #Смещение категориальных признаков разметки
 Y_shift = 1
 
@@ -266,10 +196,6 @@ get_index_features = False
 stop_loss_flag = False
 stop_loss = -0.1 # в %
 
-
-# In[ ]:
-
-
 def is_notebook() -> bool:
     try:
         shell = get_ipython().__class__.__name__
@@ -282,10 +208,6 @@ def is_notebook() -> bool:
     except NameError:
         return False      # Probably standard Python interpreter
 
-
-# In[16]:
-
-
 def plt_to_png(graph):
     buffer = io.BytesIO()
     graph.savefig(buffer, format='png')
@@ -297,10 +219,6 @@ def plt_to_png(graph):
     graph.close()
 
     return graphic
-
-
-# In[17]:
-
 
 #Смотрим результаты разметки
 def show(quotes_with_extrems):
@@ -330,10 +248,6 @@ def show(quotes_with_extrems):
     y_min = quotes_with_extrems['Low'].min()*0.95
     
     return quotes_with_extrems
-
-
-# In[18]:
-
 
 def get_ideal_profit(quotes_with_extrems):
     #Трейды без смещения
@@ -381,10 +295,6 @@ def get_ideal_profit(quotes_with_extrems):
     #print("Доходность без смещения: ", profit_without_shift)
     
     return profit_without_shift, trades_without_shift
-
-
-# In[19]:
-
 
 def get_profit_with_shift(df):    
     quotes_with_extrems = df.copy(deep = True)
@@ -444,10 +354,6 @@ def get_profit_with_shift(df):
         profit_with_shift = profit_with_shift * row[2]
     
     return profit_with_shift, trades_with_shift
-
-
-# In[20]:
-
 
 def get_strategy_inf(dataset, ref):
 
@@ -580,33 +486,14 @@ def get_strategy_inf(dataset, ref):
     return dataset, results
 
 
-# In[21]:
-
-
-ticker = 'SBER'
+#ticker = 'SBER'
 quotes_temp = Ticker(ticker)
 # Свечи по акциям за период
 quotes_1d = quotes_temp.candles(date = start_date, till_date = end_date, period=interval)
 
-
-# In[22]:
-
-
 def main (ticker):
     
     #КОТИРОВКИ!
-    #Получаем дневные данные
-#     quotes_1d_temp=yf.Ticker(ticker)
-#     quotes_1d=quotes_1d_temp.history(
-#         interval = "1d",# valid intervals: 1m,2m,5m,15m,30m,60m,90m,1h,1d,5d,1wk,1mo,3mo
-#         period="max"
-#     ) #  1d, 5d, 1mo, 3mo, 6mo, 1y, 2y, 5y, 10y, ytd, max
-#     quotes_1d = quotes_1d.dropna()
-#     quotes_1d.index = quotes_1d.index.tz_localize(None)
-#     quotes_1d.sort_index(ascending=True, inplace = True)
-#     quotes_1d.index.name = "Datetime"
-
-    # Акции
     quotes_temp = Ticker(ticker)
     # Свечи по акциям за период
     quotes_1d = quotes_temp.candles(date = start_date, till_date = end_date, period=interval)
@@ -625,10 +512,6 @@ def main (ticker):
     )
     quotes_1d.index = quotes_1d['Datetime']
     quotes_1d.sort_index(ascending=True, inplace = True)
-
-#     #Фильтруем данные
-#     if data_filter_flag:
-#         quotes_1d = date_filter(quotes_1d, filter_data_timezone, filter_data_start, filter_data_end)
 
     #Получаем экстремумы по дневному графику
     print('Получаем экстремумы по дневному графику')
@@ -710,10 +593,6 @@ def main (ticker):
     
     return num_logic_df
 
-
-# In[23]:
-
-
 def date_filter_1(quotes, filter_data_timezone, filter_data_start, filter_data_end):
     import datetime
     import pytz
@@ -737,10 +616,6 @@ def date_filter_1(quotes, filter_data_timezone, filter_data_start, filter_data_e
             pass
     
     return quotes
-
-
-# In[24]:
-
 
 #Подготовка данных
 def prepade_df(df, dataset):
@@ -779,10 +654,6 @@ def prepade_df(df, dataset):
         
     return trainX, trainY, train_quotes_close
 
-
-# In[25]:
-
-
 #Расчёт на основании модели
 def calc_signals(model, trainX, trainY, train_quotes_close):
     
@@ -818,22 +689,13 @@ def calc_signals(model, trainX, trainY, train_quotes_close):
     
     trends_origin = np.asarray(trends_origin).astype(int)
     trends_predict = np.asarray(trends_predict).astype(int)
-    
-    
-#     print(trends_origin)
-#     print(trends_predict)
         
     f1_metric = f1_score(trends_origin, trends_predict, pos_label=2)
     
-#     print(f1_metric)
-
     return np_result_Y, trends_predict, trends_origin, f1_metric
 
 
 # # Загружаем нейронные сети
-
-# In[26]:
-
 
 #загружаем инвестиционные нейронные сети "neurals_tech_for_investing_signals"
 model_num_logic = load_model('./'+neural_path+'/ansamble_num_logic_1d_1w_v1.h5', compile=False)
@@ -842,24 +704,13 @@ model_num_logic.compile() #Paste it here
 
 # # Загружаем новый тикер и обрабатываем его
 
-# In[27]:
-
-
 print("Начинаем обработку нового тикера: ", ticker, datetime.datetime.now())
 print("Получаем датасеты")
 temp = main(ticker)
 
-
-# In[28]:
-
-
 #Предобрабатываем датасеты
 print("Предобрабатываем датасеты")
 num_logic_for_neurals = prepade_df(temp, 'num_logic_1d_1w')
-
-
-# In[29]:
-
 
 #Расчёт сигналов
 ansamble_signals_temp = calc_signals(model_num_logic, num_logic_for_neurals[0], num_logic_for_neurals[1], num_logic_for_neurals[2])
@@ -868,23 +719,13 @@ ansamble_signals = ansamble_signals_temp[0]
 f1_metric = ansamble_signals_temp[3]
 
 
-# In[ ]:
-
-
-
-
-
 # # Смотрим разметку
-
-# In[30]:
-
 
 # Акции
 quotes_temp = Ticker(ticker)
 # Свечи по акциям за период
 quotes_1d = quotes_temp.candles(date = start_date, till_date = end_date, period=interval)
 quotes_1d = pd.DataFrame(quotes_1d)
-#quotes_1d.head()
 
 quotes_1d.rename(
     columns = {
@@ -899,39 +740,18 @@ quotes_1d.rename(
 quotes_1d.index = quotes_1d['Datetime']
 quotes_1d.sort_index(ascending=True, inplace = True)
 
-
-# In[31]:
-
-
 dataset_trade_quotes_with_extrems = get_extrems(quotes_1d, delete_not_marking_data, count_points).copy(deep = True)
-
-
-# In[32]:
-
 
 #!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 #СМОТРИМ РЕЗУЛЬТАТЫ РАЗМЕТКИ!!!!
 #!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 dataset_trade_quotes_with_extrems = show(dataset_trade_quotes_with_extrems)
 
-
-# In[ ]:
-
-
-
-
-
-# In[33]:
-
-
 len_dataset = dataset_trade_quotes_with_extrems.shape[0]
 len_dataset
 
 
 # # Смотрим сигналы по разметке и ансамблю
-
-# In[34]:
-
 
 try:
     if is_notebook():
@@ -956,31 +776,12 @@ try:
 except:
     pass
 
-
-# In[ ]:
-
-
-
-
-
 # # Смотрим показатели точности нейронной сети
-
-# In[35]:
-
-
 def toFixed(numObj, digits=0):
     return f"{100*numObj:.{digits}f}"
 
-
-# In[36]:
-
-
 def toFixed1(numObj, digits=0):
     return f"{numObj:.{digits}f}"
-
-
-# In[37]:
-
 
 test_accuracy_score = toFixed(accuracy_score(ansamble_signals_temp[2][-len_dataset:], ansamble_signals_temp[1][-len_dataset:]), 2)
 test_roc_auc_score = toFixed1(roc_auc_score(ansamble_signals_temp[2][-len_dataset:], ansamble_signals_temp[1][-len_dataset:]), 2)
@@ -988,17 +789,6 @@ test_precision_score = toFixed(precision_score(ansamble_signals_temp[2][-len_dat
 test_recall_score = toFixed(recall_score(ansamble_signals_temp[2][-len_dataset:], ansamble_signals_temp[1][-len_dataset:], pos_label=2), 2)
 test_f1_score = toFixed(f1_score(ansamble_signals_temp[2][-len_dataset:], ansamble_signals_temp[1][-len_dataset:], pos_label=2), 2)
 test_log_loss = toFixed1(log_loss(ansamble_signals_temp[2][-len_dataset:], ansamble_signals_temp[1][-len_dataset:]), 2)
-
-
-# In[38]:
-
-
-# print('accuracy:', accuracy_score(ansamble_signals_temp[2][-len_dataset:], ansamble_signals_temp[1][-len_dataset:]))
-# print('roc-auc:', roc_auc_score(ansamble_signals_temp[2][-len_dataset:], ansamble_signals_temp[1][-len_dataset:]))
-# print('precision:', precision_score(ansamble_signals_temp[2][-len_dataset:], ansamble_signals_temp[1][-len_dataset:], pos_label=2))
-# print('recall:', recall_score(ansamble_signals_temp[2][-len_dataset:], ansamble_signals_temp[1][-len_dataset:], pos_label=2))
-# print('f1:', f1_score(ansamble_signals_temp[2][-len_dataset:], ansamble_signals_temp[1][-len_dataset:], pos_label=2))
-# print('logloss:', log_loss(ansamble_signals_temp[2][-len_dataset:], ansamble_signals_temp[1][-len_dataset:]))
 
 print('accuracy, %:', toFixed(accuracy_score(ansamble_signals_temp[2][-len_dataset:], ansamble_signals_temp[1][-len_dataset:]), 2))
 #print('roc-auc:', toFixed(roc_auc_score(ansamble_signals_temp[2][-len_dataset:], ansamble_signals_temp[1][-len_dataset:]), 2))
@@ -1008,51 +798,17 @@ print('recall, %:', toFixed(recall_score(ansamble_signals_temp[2][-len_dataset:]
 print('f1, %:', toFixed(f1_score(ansamble_signals_temp[2][-len_dataset:], ansamble_signals_temp[1][-len_dataset:], pos_label=2), 2))
 print('logloss:', toFixed1(log_loss(ansamble_signals_temp[2][-len_dataset:], ansamble_signals_temp[1][-len_dataset:]), 2))
 
-
-# In[ ]:
-
-
-
-
-
 # # Расчёт бизнес-метрик по разметке
-
-# In[ ]:
-
-
-
-
-
-# In[39]:
-
-
 #Ставка рефинансирования
 ref = 4.5
 temp = get_strategy_inf(dataset_trade_quotes_with_extrems, ref)
 result_ideal_strategy = temp[0]
 
-
-# In[40]:
-
-
 results_ideal_strategy = temp[1]
-
-
-# In[41]:
-
-
 results_ideal_strategy
-
-
-# In[42]:
-
 
 #Динамика доходности портфеля сложным процентом
 result_ideal_strategy[result_ideal_strategy['Trend'] == 'buy'].tail(3)
-
-
-# In[43]:
-
 
 result_ideal = result_ideal_strategy.copy(deep = True)
 result_ideal['dyn_current_trade_ideal_profit'] = np.where(
@@ -1066,10 +822,6 @@ result_ideal['dyn_trade_ideal_profit'] = np.where(
     None
 )
 result_ideal['dyn_trade_ideal_profit'] = result_ideal['dyn_trade_ideal_profit'].fillna(method = 'ffill')
-
-
-# In[44]:
-
 
 try:
     if is_notebook():
@@ -1086,10 +838,6 @@ try:
         #plt.close()
 except:
     pass
-
-
-# In[45]:
-
 
 try:
     if is_notebook():
@@ -1108,29 +856,9 @@ except:
     pass
 
 
-# In[ ]:
-
-
-
-
-
 # # Расчёт бизнес-метрик по расчётам нейронной сети
-
-# In[46]:
-
-
 #делаем переразметку относительно засчётных данных
 calc_dataset = dataset_trade_quotes_with_extrems.copy(deep = True)
-
-
-# In[ ]:
-
-
-
-
-
-# In[47]:
-
 
 #Добавляем поле с сигналами и трендами
 try:
@@ -1141,21 +869,7 @@ except:
     calc_dataset['signals'] = ansamble_signals_temp[0]
     calc_dataset['trends'] = ansamble_signals_temp[1]
 
-
-# In[ ]:
-
-
-
-
-
-# In[48]:
-
-
 #Переопределяем поля разметки
-
-
-# In[49]:
-
 
 calc_dataset['extr'] = None
 
@@ -1172,48 +886,18 @@ for i, row in calc_dataset.iterrows():
 
 calc_dataset.tail(3)
 
-
-# In[50]:
-
-
 calc_dataset['Trend'] = None
 calc_dataset['Trend'] = np.where(calc_dataset['trends'] == 2, 'buy',calc_dataset['Trend'])
 calc_dataset['Trend'] = np.where(calc_dataset['trends'] == 0, 'sell',calc_dataset['Trend'])
 calc_dataset.tail(3)
 
-
-# In[ ]:
-
-
-
-
-
-# In[51]:
-
-
 temp = get_strategy_inf(calc_dataset, ref)
-
-
-# In[52]:
-
 
 result_calc_strategy = temp[0]
 
-
-# In[53]:
-
-
 results_calc_strategy = temp[1]
 
-
-# In[54]:
-
-
 results_calc_strategy
-
-
-# In[55]:
-
 
 result_calc = result_calc_strategy.copy(deep = True)
 result_calc['dyn_current_trade_ideal_profit'] = np.where(
@@ -1227,10 +911,6 @@ result_calc['dyn_trade_ideal_profit'] = np.where(
     None
 )
 result_calc['dyn_trade_ideal_profit'] = result_calc['dyn_trade_ideal_profit'].fillna(method = 'ffill')
-
-
-# In[56]:
-
 
 try:
     if is_notebook():
@@ -1248,10 +928,6 @@ try:
 except:
     pass
 
-
-# In[57]:
-
-
 try:
     if is_notebook():
         #Смотрим динамику доходности портфеля с нейронными сетями
@@ -1268,16 +944,6 @@ try:
 except:
     pass
 
-
-# In[ ]:
-
-
-
-
-
-# In[58]:
-
-
 np_signals = result_calc['signals'].values
 
 #Расчёт трендов для тренировочной выборки на основе сигналов по разметке
@@ -1291,49 +957,22 @@ for i in range(np_signals.shape[0]):
 result_calc['neural_trends'] = np_neural_trends
 
 
-# In[60]:
-
-
 output_data = result_calc[['Open', 'Close', 'High', 'Low', 'value', 'Volume', 'Datetime',
        'extr', 'Trend', 'neural_trends']].rename(columns = {
     'Trend':'Разметка',
 })
 
 
-# In[61]:
-
-
 output_data['neural_trends'] = np.where(output_data['neural_trends'] == 2.0, 1.0, output_data['neural_trends'])
-
-
-# In[62]:
-
 
 #output_data.to_csv('results/SBER_results.csv')
 
 
 # # Сохранение результатов
 
-# In[63]:
-
-
 result_ideal_df = result_ideal[['Datetime', 'dyn_current_trade_ideal_profit', 'dyn_trade_ideal_profit']]
 
-
-# In[64]:
-
-
 result_calc_df = result_calc_strategy[['Datetime', 'dyn_current_trade_ideal_profit', 'dyn_trade_ideal_profit']]
-
-
-# In[ ]:
-
-
-
-
-
-# In[92]:
-
 
 result = {
     'task_id': task_id,
@@ -1476,16 +1115,8 @@ result = {
     }
 }
 
-
-# In[93]:
-
-
 # with open('results/calc_profit.json', 'w') as f:
 #     json.dump(result, f)
-
-
-# In[ ]:
-
 
 count = 0
 

@@ -1,27 +1,14 @@
 #!/usr/bin/env python
 # coding: utf-8
 
-# In[1]:
-
-
 import numpy as np
 import pandas as pd
 from sklearn.preprocessing import MinMaxScaler
 from pandas import read_csv
 import requests
-
-
-# In[2]:
-
-
 import json
 import argparse
 import psycopg2
-
-
-# In[3]:
-
-
 import os
 import tensorflow as tf
 from tensorflow import keras
@@ -52,18 +39,10 @@ import io
 from PIL import Image
 import base64
 
-
-# In[4]:
-
-
 #%matplotlib qt
 
 
 # # Загрузка параметров
-
-# In[5]:
-
-
 load_params_from_config_file = True #Загрузка параметров из файла
 load_params_from_command_line = False #Загрузка параметров из командной строки
 args = None
@@ -94,10 +73,6 @@ try:
             load_params_from_command_line = True
 except:
     print("Ошибка парсинга параметров из командной строки")
-
-
-# In[6]:
-
 
 if load_params_from_config_file:
     #Если есть параметры командной строки
@@ -148,10 +123,6 @@ if load_params_from_command_line:
 
 Y_shift = 0
 
-
-# In[7]:
-
-
 type = 'current'# Тип нейросети в ансамбле
 period = '1d'
 
@@ -176,10 +147,6 @@ save_model_flag = True
 
 dataset = dataset_type + '_' + dataset_timeframe
 
-
-# In[8]:
-
-
 def is_notebook() -> bool:
     try:
         shell = get_ipython().__class__.__name__
@@ -191,9 +158,6 @@ def is_notebook() -> bool:
             return False  # Other type (?)
     except NameError:
         return False      # Probably standard Python interpreter
-
-
-# In[9]:
 
 
 #Создаём директории
@@ -216,10 +180,6 @@ try:
         print("Директория нейронной сети существует")
 except:
     print("Ошибка создания директории нейронной сети")
-
-
-# In[9]:
-
 
 # Импортируем данные для обучения и тестирования
 print("Импортируем данные")
@@ -294,17 +254,10 @@ if scale_flag:
 trainX = np.reshape(trainX, (trainX.shape[0], 1, trainX.shape[1]))
 testX = np.reshape(testX, (testX.shape[0], 1, testX.shape[1]))
 
-
-# In[10]:
-
-
 #Проверяем число анализируемых факторов
 print("Число анализируемых факторов", trainX.shape[2])
 print("Число анализируемых данных тренировочной выборки", trainX.shape[0])
 print("Число анализируемых данных тестовой выборки", testX.shape[0])
-
-
-# In[11]:
 
 
 def plt_to_png(graph):
@@ -319,15 +272,8 @@ def plt_to_png(graph):
 
     return graphic
 
-
-# In[12]:
-
-
 factors_count = trainX.shape[2]
 data_count = trainX.shape[0]
-
-
-# In[13]:
 
 
 def data_train():
@@ -336,18 +282,11 @@ def data_train():
         y = trainY
         yield (x,y)
 
-
-# In[14]:
-
-
 def data_test():
     while True:
         x = testX
         y = testY
         yield (x,y)
-
-
-# In[15]:
 
 
 def tfdata_generator(x_datas, y_datas, is_training, batch_size=128):
@@ -371,16 +310,11 @@ def tfdata_generator(x_datas, y_datas, is_training, batch_size=128):
     return dataset
 
 
-# In[16]:
-
 
 training_set = tfdata_generator(trainX, trainY,is_training=True)
 
 train_generator = data_train()
 valid_generator = data_test()
-
-
-# In[17]:
 
 
 checkpoint_filepath = 'tmp/checkpoint'
@@ -391,32 +325,17 @@ model_checkpoint_callback = tf.keras.callbacks.ModelCheckpoint(
     mode='max',
     save_best_only=True)
 
-
-# In[18]:
-
-
 from datetime import datetime
 
 logdir = "logs/scalars/" + datetime.now().strftime("%Y%m%d-%H%M%S")
 tensorboard_callback = keras.callbacks.TensorBoard(log_dir=logdir)
 
-
-# In[19]:
-
-
 es = tf.keras.callbacks.EarlyStopping(monitor='val_loss', patience=5)
-
-
-# In[20]:
 
 
 #Проверяем существование нейронной сети
 #file_path = './'+neural_path+'/ansamble_'+dataset+'_v1.h5'
 file_path = neural_path+'/ansamble_'+dataset+'_v1.h5'
-
-
-# In[21]:
-
 
 #Тестируем нейронную сеть
 if (os.access(file_path, os.F_OK) == True) & (test_model_flag == True):
@@ -425,10 +344,6 @@ if (os.access(file_path, os.F_OK) == True) & (test_model_flag == True):
     print("Загружаем сеть")
     #model = load_model('./'+neural_path+'/ansamble_'+dataset+'_v1.h5');
     model = load_model(neural_path+'/ansamble_'+dataset+'_v1.h5');
-
-
-# In[22]:
-
 
 #Дообучаем нейроннуюю сеть
 if (os.access(file_path, os.F_OK) == True) & (test_model_flag == False) & (new_model_flag == False):
@@ -457,10 +372,6 @@ if (os.access(file_path, os.F_OK) == True) & (test_model_flag == False) & (new_m
         print("Сохраняем нейронную сеть")
         #model.save('./'+neural_path+'/ansamble_'+dataset+'_v1.h5')
         model.save(neural_path+'/ansamble_'+dataset+'_v1.h5')
-
-
-# In[23]:
-
 
 if ((os.access(file_path, os.F_OK) == False) | (new_model_flag == True)) & (test_model_flag == False) :
     print("Нейронная сеть Отсутствует")
@@ -537,9 +448,6 @@ if ((os.access(file_path, os.F_OK) == False) | (new_model_flag == True)) & (test
         model.save(neural_path+'/ansamble_'+dataset+'_v1.h5')
 
 
-# In[ ]:
-
-
 try:
     if is_notebook():
         #Наблюдаем показатели точности
@@ -553,15 +461,9 @@ except:
     pass
 
 
-# In[24]:
-
-
 print("Предсказываем результат")
 predict_testY = model.predict(testX, verbose = 1)
 predict_trainY = model.predict(trainX, verbose = 1)
-
-
-# In[25]:
 
 
 #Преобразовываем выходные сигналы тренировочной выборки
@@ -572,8 +474,6 @@ for predict in predict_trainY:
         
 result_predict_trainY = np.array(result_predict_trainY)
 
-
-# In[26]:
 
 
 #Преобразовываем выходные сигналы тестовой выборки
@@ -587,9 +487,6 @@ result_predict_testY = np.array(result_predict_testY)
 
 # # Расчёт трендов
 
-# In[29]:
-
-
 #Расчёт трендов для тренировочной выборки на основе сигналов по разметке
 last_train_signal = 2
 train_trends_origin = array('f', []) #Массив ожидаемых данных по тренду
@@ -597,9 +494,6 @@ for i in range(trainY.shape[0]):
     if trainY[i] != last_train_signal and (trainY[i] == 2 or trainY[i] == 0):
         last_train_signal = trainY[i]
     train_trends_origin.insert(i,last_train_signal)
-
-
-# In[30]:
 
 
 #Расчёт трендов для тестовой выборки на основе расчётных сигналов
@@ -611,9 +505,6 @@ for i in range(testY.shape[0]):
     test_trends_origin.insert(i,last_test_signal)
 
 
-# In[31]:
-
-
 #Расчёт трендов для тренировочной выборки на основе расчётных данных
 last_train_signal = 2
 train_trends_predict = array('f', []) #Массив ожидаемых данных по тренду
@@ -621,9 +512,6 @@ for i in range(len(result_predict_trainY)):
     if result_predict_trainY[i] != last_train_signal and (result_predict_trainY[i] == 2 or result_predict_trainY[i] == 0):
         last_train_signal = result_predict_trainY[i]
     train_trends_predict.insert(i,last_train_signal)
-
-
-# In[32]:
 
 
 #Расчёт трендов для тестовой выборки на основе расчётных сигналов
@@ -635,9 +523,6 @@ for i in range(len(result_predict_testY)):
     test_trends_predict.insert(i,last_test_signal)
 
 
-# In[33]:
-
-
 train_trends_origin = np.asarray(train_trends_origin).astype(int)
 test_trends_origin = np.asarray(test_trends_origin).astype(int)
 train_trends_predict = np.asarray(train_trends_predict).astype(int)
@@ -645,20 +530,12 @@ test_trends_predict = np.asarray(test_trends_predict).astype(int)
 
 
 # # Расчёт показателей точности
-
-# In[34]:
-
-
 train_accuracy_score = accuracy_score(train_trends_origin, train_trends_predict)
 train_roc_auc_score = roc_auc_score(train_trends_origin, train_trends_predict)
 train_precision_score = precision_score(train_trends_origin, train_trends_predict, pos_label=2)
 train_recall_score = recall_score(train_trends_origin, train_trends_predict, pos_label=2)
 train_f1_score = f1_score(train_trends_origin, train_trends_predict, pos_label=2)
 train_log_loss = log_loss(train_trends_origin, train_trends_predict)
-
-
-# In[35]:
-
 
 #Выводим данные результатов анализа точности
 print("РЕЗУЛЬТАТЫ АНАЛИЗА ТОЧНОСТИ");
@@ -671,20 +548,12 @@ print('recall:', recall_score(train_trends_origin, train_trends_predict, pos_lab
 print('f1:', f1_score(train_trends_origin, train_trends_predict, pos_label=2))
 print('logloss:', log_loss(train_trends_origin, train_trends_predict))
 
-
-# In[36]:
-
-
 test_accuracy_score = accuracy_score(test_trends_origin, test_trends_predict)
 test_roc_auc_score = roc_auc_score(test_trends_origin, test_trends_predict)
 test_precision_score = precision_score(test_trends_origin, test_trends_predict, pos_label=2)
 test_recall_score = recall_score(test_trends_origin, test_trends_predict, pos_label=2)
 test_f1_score = f1_score(test_trends_origin, test_trends_predict, pos_label=2)
 test_log_loss = log_loss(test_trends_origin, test_trends_predict)
-
-
-# In[37]:
-
 
 print("ТЕСТОВАЯ ВЫБОРКА")
 print('accuracy:', accuracy_score(test_trends_origin, test_trends_predict))
@@ -696,10 +565,6 @@ print('logloss:', log_loss(test_trends_origin, test_trends_predict))
 
 
 # # Сохранение результатов
-
-# In[2]:
-
-
 result = {
     'task_id': task_id,
     'edu_graph_losses': {
@@ -762,16 +627,8 @@ result = {
     }
 }
 
-
-# In[56]:
-
-
 # with open('results/edu_neurals.json', 'w') as f:
 #     json.dump(result, f)
-
-
-# In[ ]:
-
 
 count = 0
 

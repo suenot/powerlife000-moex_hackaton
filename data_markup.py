@@ -1,26 +1,11 @@
 #!/usr/bin/env python
 # coding: utf-8
-
-# In[1]:
-
-
 import warnings
 warnings.filterwarnings("ignore", category=DeprecationWarning) 
-
-
-# In[1]:
-
-
 import numpy as np
 import requests
-
-
-# In[3]:
-
-
 import datetime
 import pytz
-
 import matplotlib.dates as mdates
 import matplotlib.pyplot as plt
 import pandas as pd
@@ -29,20 +14,10 @@ from mpl_finance import candlestick_ohlc  #  pip install mpl-finance
 import mplfinance as mpf
 import yfinance as yf
 from moexalgo import Market, Ticker
-
-
-# In[4]:
-
-
 import plotly.graph_objects as go
 import warnings
 from pandas.errors import SettingWithCopyWarning
 warnings.simplefilter(action="ignore", category=SettingWithCopyWarning)
-
-
-# In[5]:
-
-
 import sys
 import json
 import argparse
@@ -51,18 +26,10 @@ from PIL import Image
 import psycopg2
 import base64
 
-
-# In[6]:
-
-
 sys.path.insert(0, 'modules')
 
 
 # # Загрузка параметров
-
-# In[7]:
-
-
 load_params_from_config_file = True #Загрузка параметров из файла
 load_params_from_command_line = False #Загрузка параметров из командной строки
 args = None
@@ -91,10 +58,6 @@ try:
             load_params_from_command_line = True
 except:
     print("Ошибка парсинга параметров из командной строки")
-
-
-# In[8]:
-
 
 if load_params_from_config_file:
     #Если есть параметры командной строки
@@ -137,10 +100,6 @@ if load_params_from_command_line:
 
 Y_shift = 0
 
-
-# In[ ]:
-
-
 def is_notebook() -> bool:
     try:
         shell = get_ipython().__class__.__name__
@@ -155,19 +114,11 @@ def is_notebook() -> bool:
 
 
 # # Читаем и выбираем данные
-
-# In[9]:
-
-
 # Акции
 quotes_temp = Ticker(ticker)
 # Свечи по акциям за период
 quotes = quotes_temp.candles(date = start_date, till_date = end_date, period=interval)
 quotes = pd.DataFrame(quotes)
-
-
-# In[10]:
-
 
 quotes.rename(
     columns = {
@@ -183,50 +134,22 @@ quotes.index = quotes['Datetime']
 quotes.sort_index(ascending=True, inplace = True)
 
 
-# In[11]:
-
-
-# mondays = WeekdayLocator(MONDAY)        # major ticks on the mondays
-# alldays = DayLocator()              # minor ticks on the days
-# weekFormatter = DateFormatter('%b %d')  # e.g., Jan 12
-# dayFormatter = DateFormatter('%d')      # e.g., 12
-
-# ticker = 'AAPL'
-
-# quotes_temp=yf.Ticker(ticker)
-# quotes=quotes_temp.history(
-#     interval = "5m",# valid intervals: 1m,2m,5m,15m,30m,60m,90m,1h,1d,5d,1wk,1mo,3mo
-#     period="60d"
-# ) #  1d, 5d, 1mo, 3mo, 6mo, 1y, 2y, 5y, 10y, ytd, max
-# quotes.head()
-
-
-# In[ ]:
-
-
-
-
-
 # # Смотрим исходные данные
-
-# In[12]:
-
-
-# fig = go.Figure(data=[go.Candlestick(
-#                 #x=quotes.index,
-#                 open=quotes['Open'],
-#                 high=quotes['High'],
-#                 low=quotes['Low'],
-#                 close=quotes['Close'])])
-# #fig.update_layout(xaxis_rangeslider_visible=False)
-# fig.show()
+try:
+    if is_notebook():
+        fig = go.Figure(data=[go.Candlestick(
+                        #x=quotes.index,
+                        open=quotes['Open'],
+                        high=quotes['High'],
+                        low=quotes['Low'],
+                        close=quotes['Close'])])
+        #fig.update_layout(xaxis_rangeslider_visible=False)
+        fig.show()
+except:
+    pass
 
 
 # # Ищем экстремумы
-
-# In[13]:
-
-
 def get_extrems(dataset, count_points):
     
     dataset['extr'] = None
@@ -342,22 +265,9 @@ def get_extrems(dataset, count_points):
 
     return dataset
 
-
-# In[14]:
-
-
 quotes_with_extrems = get_extrems(quotes, count_points)
-
-
-# In[15]:
-
-
 quotes_with_extrems['Color'] = None
 quotes_with_extrems['Trend'] = None
-
-
-# In[16]:
-
 
 #Раскрашиваем тренды
 last_extr = None
@@ -377,36 +287,13 @@ for i, quote in quotes_with_extrems.iterrows():
         quotes_with_extrems.at[i, 'Trend'] = 'sell'
     
 
-
-# In[ ]:
-
-
-
-
-
 # # Смотрим результаты разметки
-
-# In[17]:
-
-
 quotes_with_extrems['x'] = quotes_with_extrems.index
-
-
-# In[18]:
-
 
 y_max = quotes_with_extrems['High'].max()*1.05
 y_min = quotes_with_extrems['Low'].min()*0.95
 
-
-# In[19]:
-
-
 #%matplotlib qt
-
-
-# In[20]:
-
 
 try:
     if is_notebook():
@@ -455,10 +342,6 @@ except:
 
 
 # # Разметка сигналов
-
-# In[21]:
-
-
 #Разметка Y
 def quotes_with_Y(quotes_with_extrems, extr_bar_count, Y_shift, max_unmark = 0.3):
     quotes_with_extrems['Y'] = None
@@ -496,16 +379,8 @@ def quotes_with_Y(quotes_with_extrems, extr_bar_count, Y_shift, max_unmark = 0.3
 
     return quotes_with_extrems
 
-
-# In[22]:
-
-
 #Размечаем Y по дневному графику
 quotes_1d_with_Y = quotes_with_Y(quotes_with_extrems, extr_bar_count, Y_shift, max_unmark = 0.2)    
-
-
-# In[23]:
-
 
 try:
     if is_notebook():
@@ -522,13 +397,9 @@ try:
 
         plt.plot(show['Y'], label='Размеченые данные')
         plt.legend(loc="lower right")
-        #plt.show()
+        plt.show()
 except:
     pass
-
-
-# In[24]:
-
 
 def plt_to_png(graph):
     buffer = io.BytesIO()
@@ -543,23 +414,7 @@ def plt_to_png(graph):
     return graphic
 
 
-# In[25]:
-
-
-singals_example = plt_to_png(plt)
-
-
-# In[26]:
-
-
-plt.close()
-
-
 # # Расчёт трейдов при торговле в лонг
-
-# In[27]:
-
-
 #Трейды без смещения
 
 trades_without_shift = []
@@ -585,10 +440,6 @@ for i, quote in quotes_with_extrems.iterrows():
     
     iter_count = iter_count + 1
 
-
-# In[28]:
-
-
 #Доходность без смещения
 
 profit_without_shift = 1
@@ -597,10 +448,6 @@ for row in trades_without_shift:
     profit_without_shift = profit_without_shift * row[2]
     
 print("Доходность без смещения: ", profit_without_shift)
-
-
-# In[29]:
-
 
 #Трейды со смещением
 
@@ -633,10 +480,6 @@ for i, quote in quotes_with_extrems.iterrows():
     
     iter_count = iter_count + 1
 
-
-# In[30]:
-
-
 #Доходность со смещением
 
 profit_with_shift = 1
@@ -646,45 +489,17 @@ for row in trades_with_shift:
     
 print("Доходность со смещением: ", profit_with_shift)
 
-
-# In[ ]:
-
-
-
-
-
 # # Сохранение результатов
-
-# In[31]:
-
-
 result_df = quotes_with_extrems.copy(deep = True)
-
-
-# In[32]:
-
-
 result_df.drop(columns = ['value', 'end', 'Color', 'x'], inplace = True)
-
-
-# In[33]:
-
 
 result_df.rename(columns = {
     'Y':'Singals',
     'extr': 'Extrems'
 }, inplace = True)
 
-
-# In[34]:
-
-
 result_df['Trend'] = np.where(result_df['Trend'] == 'sell', 0, result_df['Trend'])
 result_df['Trend'] = np.where(result_df['Trend'] == 'buy', 1, result_df['Trend'])
-
-
-# In[42]:
-
 
 result = {
     'task_id': task_id,
@@ -712,24 +527,10 @@ result = {
     }
 }
 
-
-# In[43]:
-
-
 #result_json = json.dumps(result)
-
-
-# In[44]:
-
-
 # #
 # with open('results/murkup_data.json', 'w') as f:
 #     json.dump(result, f)
-
-
-# In[ ]:
-
-
 count = 0
 
 while True:
@@ -747,10 +548,4 @@ while True:
         break
         
     count += 1    
-
-
-# In[ ]:
-
-
-
 

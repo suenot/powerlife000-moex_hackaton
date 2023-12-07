@@ -2,10 +2,6 @@
 # coding: utf-8
 
 # # Импортируем библиотеки
-
-# In[1]:
-
-
 import datetime
 import pytz
 import os
@@ -16,7 +12,6 @@ import matplotlib.dates as mdates
 import matplotlib.pyplot as plt
 import pandas as pd
 from matplotlib.dates import MONDAY, DateFormatter, DayLocator, WeekdayLocator
-
 from mpl_finance import candlestick_ohlc  #  pip install mpl-finance
 import mplfinance as mpf
 import pandas_ta as ta
@@ -25,14 +20,8 @@ from sklearn.model_selection import train_test_split
 import talib
 import pickle
 import yfinance as yf
-# from IPython.display import clear_output
 import io
 from PIL import Image
-
-
-# In[2]:
-
-
 from sklearn.preprocessing import MinMaxScaler 
 import tensorflow as tf
 from tensorflow import keras
@@ -50,62 +39,27 @@ from tensorflow.keras.models import load_model
 from array import *
 import os.path
 import joblib
-
 from sklearn.preprocessing import LabelBinarizer
 from sklearn.model_selection import train_test_split
 from sklearn.metrics import precision_score, recall_score, auc, accuracy_score, roc_auc_score,f1_score,log_loss,\
 classification_report, roc_curve
-
 from math import sqrt
-
 from sys import argv #Module for receiving parameters from the command line
-
-
-# In[3]:
-
-
 from sqlalchemy import create_engine
 import argparse
 import psycopg2
 import base64
-
-
-# In[4]:
-
-
 import json
 from moexalgo import Market, Ticker
-
-
-# In[5]:
-
-
 import warnings
 warnings.simplefilter(action='ignore', category=pd.errors.PerformanceWarning)
-
-
-# In[6]:
-
-
 pd.options.mode.chained_assignment = None  # default='warn'
-
-
-# In[7]:
-
 
 # %matplotlib qt
 
 
 # # Импортируем модули
-
-# In[8]:
-
-
 import sys, signal
-
-
-# In[9]:
-
 
 def signal_handler(signal, frame):
     print("\nprogram exiting gracefully")
@@ -113,29 +67,13 @@ def signal_handler(signal, frame):
 
 signal.signal(signal.SIGINT, signal_handler)
 
-
-# In[10]:
-
-
 sys.path.insert(0, 'modules')
-
-
-# In[11]:
-
 
 #Системные модули
 from DB_module import DB
 from Config_module import Config
 
-
-# In[12]:
-
-
 global_config = Config()
-
-
-# In[13]:
-
 
 #Модули генерации датасета
 from date_filter import date_filter #Фильтрация данных по датам date_filter(quotes, filter_data_timezone, filter_data_start, filter_data_end)
@@ -152,9 +90,6 @@ from logic_dataset import logic_dataset#Генерация датасета на
 
 
 # # Параметры генерируемого датасета
-
-# In[14]:
-
 
 load_params_from_config_file = True #Загрузка параметров из файла
 load_params_from_command_line = False #Загрузка параметров из командной строки
@@ -186,10 +121,6 @@ try:
             load_params_from_command_line = True
 except:
     print("Ошибка парсинга параметров из командной строки")
-
-
-# In[15]:
-
 
 if load_params_from_config_file:
     #Если есть параметры командной строки
@@ -241,10 +172,6 @@ if load_params_from_command_line:
 
 Y_shift = 0
 
-
-# In[16]:
-
-
 #Смещение категориальных признаков разметки
 Y_shift = 1
 
@@ -267,10 +194,6 @@ delete_not_marking_data = False
 #Максимальное количество конечных баров волны в %, которые не размечаем
 max_unmark = 0.33
 
-
-# In[ ]:
-
-
 def is_notebook() -> bool:
     try:
         shell = get_ipython().__class__.__name__
@@ -282,10 +205,6 @@ def is_notebook() -> bool:
             return False  # Other type (?)
     except NameError:
         return False      # Probably standard Python interpreter
-
-
-# In[17]:
-
 
 def plt_to_png(graph):
     buffer = io.BytesIO()
@@ -299,25 +218,9 @@ def plt_to_png(graph):
 
     return graphic
 
-
-# In[18]:
-
-
 def main (ticker, start_date, end_date):
     
     #КОТИРОВКИ!
-    #Получаем дневные данные
-#     quotes_1d_temp=yf.Ticker(ticker)
-#     quotes_1d=quotes_1d_temp.history(
-#         interval = "1d",# valid intervals: 1m,2m,5m,15m,30m,60m,90m,1h,1d,5d,1wk,1mo,3mo
-#         period="max"
-#     ) #  1d, 5d, 1mo, 3mo, 6mo, 1y, 2y, 5y, 10y, ytd, max
-#     quotes_1d = quotes_1d.dropna()
-#     quotes_1d.index = quotes_1d.index.tz_localize(None)
-#     quotes_1d.sort_index(ascending=True, inplace = True)
-#     quotes_1d.index.name = "Datetime"
-
-    # Акции
     quotes_temp = Ticker(ticker)
     # Свечи по акциям за период
     quotes_1d = quotes_temp.candles(date = start_date, till_date = end_date, period=interval)
@@ -338,10 +241,6 @@ def main (ticker, start_date, end_date):
     quotes_1d.sort_index(ascending=True, inplace = True)
     
     quotes_1d = quotes_1d[:-1]
-
-#     #Фильтруем данные
-#     if data_filter_flag:
-#         quotes_1d = date_filter(quotes_1d, filter_data_timezone, filter_data_start, filter_data_end)
 
     #Получаем экстремумы по дневному графику
     print('Получаем экстремумы по дневному графику')
@@ -423,10 +322,6 @@ def main (ticker, start_date, end_date):
     
     return num_logic_df
 
-
-# In[19]:
-
-
 #Подготовка данных
 def prepade_df(df, dataset):
     
@@ -503,20 +398,10 @@ def calc_signals(model, trainX, trainY, train_quotes_close):
     
     trends_origin = np.asarray(trends_origin).astype(int)
     trends_predict = np.asarray(trends_predict).astype(int)
-    
-    
-#     print(trends_origin)
-#     print(trends_predict)
         
     f1_metric = f1_score(trends_origin, trends_predict, pos_label=2)
-    
-#     print(f1_metric)
 
     return np_result_Y, trends_predict, trends_origin, f1_metric
-
-
-# In[21]:
-
 
 ticker_count = 0
 def get_new_ticker():
@@ -532,20 +417,12 @@ def get_new_ticker():
 
 
 # # Загружаем нейронные сети
-
-# In[22]:
-
-
 #загружаем инвестиционные нейронные сети "neurals_tech_for_investing_signals"
 model_num_logic = load_model('./'+neural_path+'/ansamble_num_logic_1d_1w_v1.h5', compile=False)
 model_num_logic.compile() #Paste it here
 
 
 # # Делаем запись о задаче по запуску сервиса
-
-# In[23]:
-
-
 #Соединение с БД
 def connect():
     return psycopg2.connect(
@@ -555,68 +432,10 @@ def connect():
         password=global_config.db_password
     )
 conn = connect()
-
-
-# In[24]:
-
-
-#Обновляем данные по задаче
-# if conn.closed == 1:
-#     conn = connect()
-# cur = conn.cursor()
-
-# sql = """ UPDATE calc_signals_tasks
-#             SET task_status = %s
-#             WHERE id = %s"""
-# try:
-#     cur.execute(sql, ('done', task_id))
-# except Exception as e:
-#     print("Ошибка записи информации о закрытии задачи в БД: ", e)
-
-
-# In[25]:
-
-
 conn.close()
 
 
-# In[ ]:
-
-
-# result = {
-#     'task_id': task_id,
-#     'description': 'Script for generating signals started.',
-#     'status': 'Started'
-# }
-
-
-# In[ ]:
-
-
-# count = 0
-
-# while True:
-#     try:
-#         url = 'http://'+respos_url+'/api/v1/task/complied'
-#         response = requests.post(url, json = result)
-#         if response.status_code == 200:
-#             print("Запрос успешно отправлен:")
-#             break
-#     except Exception as err:
-#         print("Ошибка отправка запроса на API:", err)
-    
-#     #Делаем повторные попытки в случае ошибки
-#     if count >= 5:
-#         break
-        
-#     count += 1    
-
-
 # # Загружаем новый тикер и обрабатываем его
-
-# In[ ]:
-
-
 while True:
     try:
         #Получаем новый тикер для обработки
@@ -690,18 +509,12 @@ while True:
                 last_num_signal = None
                 logic_signal = None
                 last_logic_signal = None
-#                                     ansamble_signal = ansamble_signals[ansamble_signals.shape[0]-1]
-#                                     last_ansamble_signal = ansamble_signals[ansamble_signals.shape[0]-1]
 
                 df_ansamble = pd.DataFrame(ansamble_signals)
 
-                #ansamble_signal = df_ansamble[df_ansamble[0] != 1].iloc[-1].values[0]
-                #last_ansamble_signal = df_ansamble[df_ansamble[0] != 1].iloc[-2].values[0]
                 last_ansamble_signal = 1
 
                 ansamble_signal_length = df_ansamble.shape[0]-1
-
-#                                         ansamble_signal_position = ansamble_signal_length - df_ansamble[df_ansamble[0] != 1].iloc[-1].name
 
                 current_signal = None
                 count_pos = 0
@@ -822,10 +635,4 @@ while True:
     except Exception as e:
         print("Не учтённая ошибка: ", datetime.datetime.now(), ' e: ', e)
         continue
-
-
-# In[ ]:
-
-
-
 

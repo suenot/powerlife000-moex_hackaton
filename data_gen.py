@@ -3,9 +3,6 @@
 
 # # Импортируем библиотеки
 
-# In[1]:
-
-
 import datetime
 import pytz
 import os
@@ -16,62 +13,28 @@ import matplotlib.pyplot as plt
 import base64
 import pandas as pd
 from matplotlib.dates import MONDAY, DateFormatter, DayLocator, WeekdayLocator
-
 import pandas_ta as ta
 import numpy as np
-
 import yfinance as yf
 import pickle
-
 from sklearn.model_selection import train_test_split
-
-
-# In[2]:
-
-
 import json
 from moexalgo import Market, Ticker
 import io
 from PIL import Image
 import psycopg2
 
-
-# In[3]:
-
-
 import warnings
 warnings.simplefilter(action='ignore', category=pd.errors.PerformanceWarning)
-
-
-# In[4]:
-
 
 pd.options.mode.chained_assignment = None  # default='warn'
 
 
-# In[5]:
-
-
-#matplotlib qt
-
-
 # # Импортируем модули
-
-# In[6]:
-
-
 import sys
 import argparse
 
-
-# In[7]:
-
-
 sys.path.insert(0, 'modules')
-
-
-# In[8]:
-
 
 #Модули генерации датасета
 from date_filter import date_filter #Фильтрация данных по датам date_filter(quotes, filter_data_timezone, filter_data_start, filter_data_end)
@@ -88,10 +51,6 @@ from logic_dataset import logic_dataset#Генерация датасета на
 
 
 # # Параметры генерируемого датасета
-
-# In[9]:
-
-
 load_params_from_config_file = True #Загрузка параметров из файла
 load_params_from_command_line = False #Загрузка параметров из командной строки
 args = None
@@ -122,10 +81,6 @@ try:
             load_params_from_command_line = True
 except:
     print("Ошибка парсинга параметров из командной строки")
-
-
-# In[10]:
-
 
 if load_params_from_config_file:
     #Если есть параметры командной строки
@@ -176,22 +131,6 @@ if load_params_from_command_line:
 
 Y_shift = 0
 
-
-# In[ ]:
-
-
-
-
-
-# In[ ]:
-
-
-
-
-
-# In[11]:
-
-
 #Смещение категориальных признаков разметки
 Y_shift = 1
 
@@ -212,10 +151,6 @@ size_flag = True
 #Флаг необходимости удаления не размеченных данных
 delete_not_marking_data = True
 
-
-# In[1]:
-
-
 def is_notebook() -> bool:
     try:
         shell = get_ipython().__class__.__name__
@@ -227,10 +162,6 @@ def is_notebook() -> bool:
             return False  # Other type (?)
     except NameError:
         return False      # Probably standard Python interpreter
-
-
-# In[12]:
-
 
 def plt_to_png(graph):
     buffer = io.BytesIO()
@@ -245,24 +176,9 @@ def plt_to_png(graph):
     return graphic
 
 
-# In[13]:
-
-
 def main (ticker):
     
     #КОТИРОВКИ!
-    #Получаем дневные данные
-#     quotes_1d_temp=yf.Ticker(ticker)
-#     quotes_1d=quotes_1d_temp.history(
-#         interval = "1d",# valid intervals: 1m,2m,5m,15m,30m,60m,90m,1h,1d,5d,1wk,1mo,3mo
-#         period="max"
-#     ) #  1d, 5d, 1mo, 3mo, 6mo, 1y, 2y, 5y, 10y, ytd, max
-#     quotes_1d = quotes_1d.dropna()
-#     quotes_1d.index = quotes_1d.index.tz_localize(None)
-#     quotes_1d.sort_index(ascending=True, inplace = True)
-#     quotes_1d.index.name = "Datetime"
-
-    # Акции
     quotes_temp = Ticker(ticker)
     # Свечи по акциям за период
     quotes_1d = quotes_temp.candles(date = start_date, till_date = end_date, period=interval)
@@ -281,10 +197,6 @@ def main (ticker):
     )
     quotes_1d.index = quotes_1d['Datetime']
     quotes_1d.sort_index(ascending=True, inplace = True)
-
-#     #Фильтруем данные
-#     if data_filter_flag:
-#         quotes_1d = date_filter(quotes_1d, filter_data_timezone, filter_data_start, filter_data_end)
 
     #Получаем экстремумы по дневному графику
     print('Получаем экстремумы по дневному графику')
@@ -382,17 +294,7 @@ def main (ticker):
         num_logic_df_test.to_csv(data_path+"/num_logic_1d_1w_test.csv", mode='a', header= False)
 
 
-# In[14]:
-
-
-#main('SBER')
-#main('ABIO')
-
-
 # # Проверяем контрольную точку продолжения генерации датасетов
-
-# In[15]:
-
 
 def check_size():
     #Проверяем наличие датасетов
@@ -421,16 +323,6 @@ def check_size():
     else:
         os.mkdir(data_path)
         return True
-
-
-# In[ ]:
-
-
-
-
-
-# In[16]:
-
 
 #Проверяем наличие датасетов
 folder = Path(data_path)
@@ -461,10 +353,6 @@ else:
 
 
 # # Загружаем список для генерации
-
-# In[17]:
-
-
 stocks = Market('stocks')
 
 tickers_list_temp = stocks.tradestats(date='2023-10-10')
@@ -481,10 +369,6 @@ tickers_list = tickers_list.groupby('ticker').agg(
 
 
 # # Генерируем датасеты
-
-# In[20]:
-
-
 if len(tickers_list) > 0:
     for ticker in tickers_list:
 
@@ -506,25 +390,14 @@ else:
 
 
 # # Сохранение результатов
-
-# In[14]:
-
-
 result = {
     'task_id': task_id,
     'status': 'done'
 }
 
-
-# In[15]:
-
-
+#Сохранение результатов в файл
 # with open('results/data_gen.json', 'w') as f:
 #     json.dump(result, f)
-
-
-# In[15]:
-
 
 count = 0
 
@@ -543,58 +416,4 @@ while True:
         break
         
     count += 1    
-
-
-# In[ ]:
-
-
-
-
-
-# In[ ]:
-
-
-
-
-
-# In[ ]:
-
-
-
-
-
-# In[ ]:
-
-
-
-
-
-# In[ ]:
-
-
-
-
-
-# In[ ]:
-
-
-
-
-
-# In[ ]:
-
-
-
-
-
-# In[ ]:
-
-
-
-
-
-# In[ ]:
-
-
-
 
