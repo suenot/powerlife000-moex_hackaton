@@ -1101,16 +1101,16 @@ result = {
         'description': 'Динамика доходности стратегии по разметке',
         'value': {
             'Datetime': result_ideal_df['Datetime'].values.tolist(),
-            'dyn_trades_profit': result_ideal_df['dyn_current_trade_ideal_profit'].values.tolist(),
-            'dyn_portfel_profit': result_ideal_df['dyn_current_trade_ideal_profit'].values.tolist(),
+            'dyn_trades_profit': result_ideal_df['dyn_current_trade_ideal_profit'].fillna(0).values.tolist(),
+            'dyn_portfel_profit': result_ideal_df['dyn_current_trade_ideal_profit'].fillna(0).values.tolist(),
         }
     },
     'dyn_neural_trading': {
         'description': 'Динамика доходности нейронной сети',
         'value': {
             'Datetime': result_calc_df['Datetime'].values.tolist(),
-            'dyn_trades_profit': result_calc_df['dyn_current_trade_ideal_profit'].values.tolist(),
-            'dyn_portfel_profit': result_calc_df['dyn_current_trade_ideal_profit'].values.tolist(),
+            'dyn_trades_profit': result_calc_df['dyn_current_trade_ideal_profit'].fillna(0).values.tolist(),
+            'dyn_portfel_profit': result_calc_df['dyn_current_trade_ideal_profit'].fillna(0).values.tolist(),
         }
     }
 }
