@@ -603,7 +603,7 @@ while True:
                     count = 0
                     while True:
                         try:
-                            url = 'http://'+respos_url+'/api/v1/task/complied'
+                            url = 'http://'+respos_url+'/api/v1/signal/add'
                             response = requests.post(url, json = result)
                             if response.status_code == 200:
                                 print("Запрос успешно отправлен:")
