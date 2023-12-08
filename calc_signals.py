@@ -158,7 +158,7 @@ if load_params_from_config_file:
     
 if load_params_from_command_line:
     task_id = str(args.task_id)
-    tickers = args.ticker.replace(']',"").replace('[',"").replace('"',"").replace("'","").split(",")
+    tickers = args.ticker.replace(']',"").replace("\\","").replace("/","").replace('[',"").replace('"',"").replace("'","").split(",")
     scaler_path = str(args.scaler_path)
     neural_path = str(args.neural_path) 
     interval = str(args.timeframe)
