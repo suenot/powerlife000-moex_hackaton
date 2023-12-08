@@ -1123,7 +1123,7 @@ count = 0
 while True:
     try:
         url = 'http://'+respos_url+'/api/v1/task/complied'
-        response = requests.post(url, json = result)
+        response = requests.post(url, json = json.dumps(result), headers={"Content-Type": "application/json"})
         if response.status_code == 200:
             print("Запрос успешно отправлен:")
             break
