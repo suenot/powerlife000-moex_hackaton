@@ -17,7 +17,7 @@ python calc_profit.py \
 python calc_signals.py  \
 	--cmd_config \
 	--task_id 123 \
-	--tickers ["SBER", "ABIO"] \
+	--ticker ["SBER", "ABIO"] \
 	--scaler_path app/scalers/1D \
 	--neural_path app/neurals/1D \
 	--timeframe 1D \
